@@ -11,8 +11,8 @@
 - 规范路径处理
 - 优化代码
 
-* 如果卡在"已下载图片 XX/XX"的位置, 可以注意下网速和下载文件夹, 除当前资源下载线程等待外, 其它线程应该正常工作, 请耐心等待 *  
-* 下载期间可能严重影响正常上网 *  
+
+*如果卡在 "已下载图片 XX/XX" 的位置, 可以注意下网速和下载文件夹, 除当前资源下载线程等待外, 其它线程应该正常工作, 请耐心等待。下载占用巨大带宽, 可能严重影响正常上网* 
 
 2017/9/17  
 - 更正一处编码错误
@@ -20,12 +20,12 @@
 
 ## 用法
 
-- ### 没有Python2的Windows环境
+### 没有Python2的Windows环境
 下载 [weiboPicDownloader.exe](https://raw.githubusercontent.com/nondanee/weiboPicDownloader/master/dist/weiboPicDownloader.exe), 双击运行
 
 *注: 由py2exe打包而成, setup.py 为其打包配置*  
 
-- ### 有Python2环境的Windows/macOS/Linux环境
+### 有Python2环境的Windows/macOS/Linux环境
 控制台执行 `python weiboPicDownloader.py` 
 
 *注: 增加多线程下载后需pip安装futures模块*  
