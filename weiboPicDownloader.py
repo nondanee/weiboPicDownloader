@@ -17,20 +17,19 @@ import concurrent.futures
 
 ssl._create_default_https_context = ssl._create_unverified_context
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"
+WEIBO_AMOUNT = 0
+PIC_AMOUNT = 0
+SAVE_PATH = ""
 
-
-def print_fit(string):
-    if type(string) is unicode:
-        print(string).encode(sys.stdin.encoding or locale.getpreferredencoding(True))
-    elif type(string) is str:
-        print(string.decode("utf-8")).encode(sys.stdin.encoding or locale.getpreferredencoding(True))
+def print_fit(string,flush=False):
+    if flush == True:
+        print "\r" + string.decode("utf-8").encode(sys.stdin.encoding or locale.getpreferredencoding(True)),
+        sys.stdout.flush()
+    else:
+        print string.decode("utf-8").encode(sys.stdin.encoding or locale.getpreferredencoding(True))
         
 def raw_input_fit(string = ""):
-    if type(string) is unicode:
-        prompt = string.encode(sys.stdin.encoding or locale.getpreferredencoding(True))
-    elif type(string) is str:
-        prompt = string.decode("utf-8").encode(sys.stdin.encoding or locale.getpreferredencoding(True))
-        
+    prompt = string.decode("utf-8").encode(sys.stdin.encoding or locale.getpreferredencoding(True))
     return raw_input(prompt).decode(sys.stdin.encoding or locale.getpreferredencoding(True))
     
 def open_and_read(url,max_retry):
@@ -46,7 +45,8 @@ def open_and_read(url,max_retry):
                 return
 
 def get_img_urls(containerid,page):
-    url = "https://m.weibo.cn/api/container/getIndex?count=25&page=%s&containerid=%s"%(page,containerid)
+    count = 25
+    url = "https://m.weibo.cn/api/container/getIndex?count={}&page={}&containerid={}".format(count,page,containerid)
     data = open_and_read(url = url,max_retry = 3)
     if data == None:
         return []
@@ -56,7 +56,11 @@ def get_img_urls(containerid,page):
         return
 
     urls = []
+    global WEIBO_AMOUNT
+    
     for card in jsondata["cards"]:
+        WEIBO_AMOUNT = WEIBO_AMOUNT + 1
+        print_fit("分析微博中: {}".format(WEIBO_AMOUNT),flush=True)
         if "mblog" in card:
             if "pics" in card["mblog"]:
                 for pic in card["mblog"]["pics"]:
@@ -114,12 +118,12 @@ def get_containerid(account_type):
     else:
         return containerid 
 
-def download_and_save(url,user_path,index,amount):
+def download_and_save(url,index):
     file_type = url[-3:]
-    file_name = str(index + 1).zfill(len(str(amount))) + "." + file_type   
-    file_path = os.path.join(user_path,file_name) 
+    file_name = str(index + 1).zfill(len(str(PIC_AMOUNT))) + "." + file_type   
+    file_path = os.path.join(SAVE_PATH,file_name) 
 
-    data = open_and_read(url = url,max_retry = 3)
+    data = open_and_read(url = url,max_retry = 1)
     if data == None:
         return index,0
     else:
@@ -139,7 +143,7 @@ def main():
     while True:
         print_fit("请输入图片要保存的地址:")
         home_path = os.path.realpath(raw_input_fit())
-        print_fit("选择的目录为 %s"%home_path.encode("utf-8")) 
+        print_fit("选择的目录为 {}".format(home_path.encode("utf-8")))
         if os.path.exists(home_path) == True:
             break
         confirm = raw_input_fit("该目录不存在, 是否创建?(Y/n):")
@@ -166,27 +170,30 @@ def main():
             choice = 3
         containerid = get_containerid(choice - 1)
         if containerid != None:
-            break
+            break  
+
+    global SAVE_PATH
+    SAVE_PATH = os.path.join(home_path,containerid[6:]) 
+    if os.path.exists(SAVE_PATH) == False:
+        os.mkdir(SAVE_PATH)
     
-    user_path = os.path.join(home_path,containerid[6:]) 
-    if os.path.exists(user_path) == False:
-        os.mkdir(user_path)
-            
-    i = 1
+    global WEIBO_AMOUNT
+    WEIBO_AMOUNT = 0
+    page = 1
     urls = []
     while True:
-        print_fit("分析微博中: %d"%i)
-        more = get_img_urls(containerid,i)
+        more = get_img_urls(containerid,page)
         if more != None:
             urls.extend(more)
-            i = i + 1
+            page = page + 1
             time.sleep(1)
         else:
             break
     
     print_fit("分析完毕")
-    amount = len(urls)
-    print_fit("图片数量: %d"%amount)
+    global PIC_AMOUNT
+    PIC_AMOUNT = len(urls)
+    print_fit("图片数量: {}".format(PIC_AMOUNT))
     
     max_workers = raw_input_fit("设置最大下载线程数(1-20):")
     try:
@@ -197,7 +204,7 @@ def main():
         max_workers = 20
     elif max_workers < 1:
         max_workers = 1
-    print_fit("最大下载线程数为 %d"%max_workers)
+    print_fit("最大下载线程数为 {}".format(max_workers))
             
 #    pool = concurrent.futures.ThreadPoolExecutor(max_workers = max_workers)
 #    futures = []
@@ -205,21 +212,19 @@ def main():
 #        futures.append(pool.submit(download_and_save, urls[x],user_path,x,amount))
 #    concurrent.futures.wait(futures)
 
-    miss = range(0,amount)  
+    miss = range(0,PIC_AMOUNT)  
     while True:
         task = get_task(urls,miss)
         executor = concurrent.futures.ThreadPoolExecutor(max_workers = max_workers)
-        results = executor.map(download_and_save,task,[user_path]*len(task),miss,[amount]*len(task))
+        results = executor.map(download_and_save,task,miss)
         
         miss = []
         for result in results:
             if result[1] == 1:
-                print_fit("已下载图片 %d/%d"%(result[0] + 1,amount))
+                print_fit("已处理 {dealt}/{amount}, 下载成功 {success}/{amount}".format(dealt=result[0]+1,success=result[0]+1-len(miss),amount=PIC_AMOUNT),flush=True)
             elif result[1] == 0:
                 miss.append(result[0])
-        
-        print_fit("下载成功 %d, 下载失败 %d"%(amount-len(miss),len(miss)))
-        
+                
         if len(miss) != 0:
             confirm = raw_input_fit("是否继续尝试?(Y/n):")
             confirm = re.sub("\s","",confirm)
@@ -233,7 +238,7 @@ def main():
     for index in miss:
         print_fit("图片 %s 下载失败 %s"%(index + 1,urls[index].encode("utf-8")))
     
-    print_fit("下载结束, 路径是 %s"%user_path.encode("utf-8"))
+    print_fit("\n下载结束, 路径是 %s"%SAVE_PATH.encode("utf-8"))
     sys.stdin.read()
     exit()
     
