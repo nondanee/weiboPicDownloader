@@ -15,7 +15,12 @@ import ssl
 import urllib2
 import concurrent.futures
 
-ssl._create_default_https_context = ssl._create_unverified_context
+try:
+    ssl._create_default_https_context = ssl._create_unverified_context
+except:
+    # ssl._create_unverified_context fails if Python version < 2.7.9
+    pass
+
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"
 WEIBO_AMOUNT = 0
 PIC_AMOUNT = 0
@@ -123,7 +128,7 @@ def download_and_save(url,index):
     file_name = str(index + 1).zfill(len(str(PIC_AMOUNT))) + "." + file_type   
     file_path = os.path.join(SAVE_PATH,file_name) 
 
-    data = open_and_read(url = url,max_retry = 1)
+    data = open_and_read(url = url,max_retry = 0)
     if data == None:
         return index,0
     else:
@@ -220,10 +225,11 @@ def main():
         
         miss = []
         for result in results:
-            if result[1] == 1:
-                print_fit("已处理 {dealt}/{amount}, 下载成功 {success}/{amount}".format(dealt=result[0]+1,success=result[0]+1-len(miss),amount=PIC_AMOUNT),flush=True)
-            elif result[1] == 0:
-                miss.append(result[0])
+            index = result[0]
+            status = result[1]
+            if status == 0:
+                miss.append(index)
+            print_fit("已处理 {dealt}/{amount}, 下载失败 {failed}/{amount}".format(dealt=index+1,failed=len(miss),amount=PIC_AMOUNT),flush=True)
                 
         if len(miss) != 0:
             confirm = raw_input_fit("是否继续尝试?(Y/n):")
@@ -233,12 +239,13 @@ def main():
             else:
                 break
         else:
+            print_fit("全部完成")
             break
             
     for index in miss:
-        print_fit("图片 %s 下载失败 %s"%(index + 1,urls[index].encode("utf-8")))
+        print_fit("图片 {} 下载失败 {}".format(index + 1,urls[index].encode("utf-8")))
     
-    print_fit("\n下载结束, 路径是 %s"%SAVE_PATH.encode("utf-8"))
+    print_fit("下载结束, 路径是 {}".format(SAVE_PATH.encode("utf-8")))
     sys.stdin.read()
     exit()
     
