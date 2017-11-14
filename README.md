@@ -43,6 +43,8 @@ python weiboPicDownloader.py
 2. 输入 3 当然你也可以输入1和2, 具体可以看[原作者(yAnXImIN)](https://github.com/yAnXImIN/)的[这篇博客](http://blog.yanximin.site/2017/09/05/weibo-userid-containerid/)
 3. 输入用户昵称
 4. 等待下载完成即可. So Easy!
+
+
 ![show](show/screenshot.png)
 
 欢迎Fork, 或者PR  
