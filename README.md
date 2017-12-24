@@ -1,8 +1,8 @@
 # 免登录下载微博图片(Python2移植版)
 
-批量下载微博图片
-移植自Java项目 [yAnXImIN/weiboPicDownloader](https://github.com/yAnXImIN/weiboPicDownloader)
-~~骗star~~
+批量下载微博图片(CLI)  
+移植自Java项目 [yAnXImIN/weiboPicDownloader](https://github.com/yAnXImIN/weiboPicDownloader)  
+~~骗star~~  
 
 ## 更新日志
 
