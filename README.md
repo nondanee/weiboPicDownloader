@@ -1,10 +1,13 @@
-# 免登录下载微博图片(Python2移植版)
+# 免登录下载微博图片(Python移植版)
 
 批量下载微博图片(CLI)  
 移植自Java项目 [yAnXImIN/weiboPicDownloader](https://github.com/yAnXImIN/weiboPicDownloader)  
 ~~骗star~~  
 
 ## 更新日志
+2018/1/26
+- 兼容py2&py3
+- 优化代码
 
 2017/12/24
 - 接口变更
