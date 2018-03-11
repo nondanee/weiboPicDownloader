@@ -1,48 +1,57 @@
-# 免登录下载微博图片(Python移植版)
+# 免登录下载微博图片
 
-批量下载微博图片(CLI)  
-移植自Java项目 [yAnXImIN/weiboPicDownloader](https://github.com/yAnXImIN/weiboPicDownloader)  
-~~骗star~~  
+批量下载微博图片(CLI)  ~~骗star~~  
 
-## 更新日志
-2018/1/26
-- 兼容py2&py3
-- 优化代码
+根源自Java项目 [yAnXImIN/weiboPicDownloader](https://github.com/yAnXImIN/weiboPicDownloader)  
 
-2017/12/24
-- 接口变更
-- 优化代码
+也从另一移植项目学习了好多 [ningshu/weiboPicDownloader](https://github.com/ningshu/weiboPicDownloader) 
 
-2017/11/14  
-- 优化代码
+非常感谢两位巨巨
 
-2017/10/6  
-- 启用flush显示进度
-- 优化代码
+## 描述
 
-2017/9/20  
-- 增加多线程下载, 支持设置线程数, 可选择重试下载
-- 设置默认选项, 添加更多交互, 完善输入检测
-- 规范路径处理
-- 优化代码
+应 issue [#2](https://github.com/nondanee/weiboPicDownloader/issues/2) [#3](https://github.com/nondanee/weiboPicDownloader/issues/3) 的要求
 
-2017/9/17  
-- 更正一处编码错误
-- 优化代码  
+支持真·批量下载
 
-## 下载
+通过命令行设置参数
 
-### 开箱即用
-转到 [Release](https://github.com/nondanee/weiboPicDownloader/releases) 下载，使用PyInstaller打包
+可以从文件导入
 
-### 克隆源码
+基本重写了代码
+
+简化了大量的交互
+
+于是新开一个分支
+
+*暂不支持通过 id 下载*
+
+## 使用
+
 ```
-git clone https://github.com/nondanee/weiboPicDownloader.git && cd weiboPicDownloader
-pip install futures
-python weiboPicDownloader.py
+$ python weiboPicDownloader.py -h
+usage: weiboPicDownloader [-h] [-n nickname] [-f file] [-d directory]
+                          [-s size]
+
+optional arguments:
+  -h, --help    show this help message and exit
+  -n nickname   target a weibo user's nickname
+  -f file       use a nickname list from file
+  -d directory  set picture saving path
+  -s size       set size of thread pool
 ```
 
-## 运行
-![show](show/screenshot.png)
+必需参数（二选一）
 
-*运行报错? 很有可能是接口又改了, 来提issue我会及时跟进*
+- `-n` 用户昵称
+- `-f` 昵称列表文件（用换行分隔）
+
+可选参数
+
+- `-d` 图片保存路径（默认为工作路径下的weiboPic目录）
+- `-s` 线程池大小（默认为20）
+
+
+
+![screenshot](show/screenshot.png)
+
