@@ -122,15 +122,15 @@ def read_from_file(file_path):
         quit(str(e))
     return nicknames
 
-def nickname_to_containerid(nickname):
+def nickname_to_uid(nickname):
     url = "https://m.weibo.com/n/{}".format(nickname)
     response = requests_with_retry(url=url)
     if url != response.url:
-        return "107603" + response.url[-10:]
+        return response.url[-10:]
     else:
         return None
 
-def id_to_nickname(uid):
+def uid_to_nickname(uid):
     url = "https://m.weibo.cn/api/container/getIndex?type=uid&value={}".format(uid)
     response = requests_with_retry(url=url)
     try:
@@ -214,16 +214,16 @@ pool = concurrent.futures.ThreadPoolExecutor(max_workers=args.size)
 
 for user in users:
     if re.search(r'^\d{10}$',user):
-        nickname = id_to_nickname(user)
-        containerid = "107603" + user
+        nickname = uid_to_nickname(user)
+        uid = user
     else:
         nickname = user
-        containerid = nickname_to_containerid(user)
-    if nickname == None or containerid == None:
+        uid = nickname_to_uid(user)
+    if nickname == None or uid == None:
         print_fit("unvalid account {}".format(user))
         continue
-    print_fit("{} {}".format(nickname,containerid[6:]))
-    urls = get_urls(containerid)
+    print_fit("{} {}".format(nickname,uid))
+    urls = get_urls("107603" + uid)
     if len(urls) == 0:
         continue
     user_album = os.path.join(saving_path,nickname)
