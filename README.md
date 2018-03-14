@@ -1,30 +1,30 @@
 # 免登录下载微博图片
 
-批量下载微博图片(CLI)  ~~骗star~~  
+批量下载微博用户图片(CLI)
 
 根源自Java项目 [yAnXImIN/weiboPicDownloader](https://github.com/yAnXImIN/weiboPicDownloader)  
 
-也从另一移植项目学习了好多 [ningshu/weiboPicDownloader](https://github.com/ningshu/weiboPicDownloader) 
+也从另一移植项目学到了好多 [ningshu/weiboPicDownloader](https://github.com/ningshu/weiboPicDownloader) 
 
 非常感谢两位巨巨
 
 ## 描述
 
-应 issue [#2](https://github.com/nondanee/weiboPicDownloader/issues/2) [#3](https://github.com/nondanee/weiboPicDownloader/issues/3) 的要求
+应 issue [#2](https://github.com/nondanee/weiboPicDownloader/issues/2) [#3](https://github.com/nondanee/weiboPicDownloader/issues/3) 的要求，现已支持真·批量下载
 
-支持真·批量下载
+可以带参数运行，也可以从文件导入
 
-通过命令行设置参数
+基本重写了代码，简化了大量的交互，删除了大量输入检查
 
-可以从文件导入
+考虑到纯命令的方式可能对普通用户不太友好，所以新建一个分支
 
-基本重写了代码
+如果没有批量需求，用原来的版本也行
 
-简化了大量的交互
+新版本同样兼容Python2和Python3
 
-于是新开一个分支
+## 预览
 
-*暂不支持通过 id 下载*
+![screenshot](show/screenshot.png)
 
 ## 使用
 
@@ -34,24 +34,24 @@ usage: weiboPicDownloader [-h] [-n nickname] [-f file] [-d directory]
                           [-s size]
 
 optional arguments:
-  -h, --help    show this help message and exit
-  -n nickname   target a weibo user's nickname
-  -f file       use a nickname list from file
-  -d directory  set picture saving path
-  -s size       set size of thread pool
+  -h, --help            show this help message and exit
+  -u user               target a weibo user's nickname or id
+  -us users [users ...]
+                        target weibo users' nickname or id
+  -f file               export user list from file
+  -d directory          set picture saving path
+  -s size               set size of thread pool
 ```
 
-必需参数（二选一）
+必需参数（任选一）
 
-- `-n` 用户昵称
-- `-f` 昵称列表文件（用换行分隔）
+- `-u` 用户（昵称或ID）
+- `-us` 多个用户（昵称或ID，用空格分隔）
+- `-f` 用户列表文件（昵称或ID，用换行分隔）
 
 可选参数
 
 - `-d` 图片保存路径（默认为工作路径下的weiboPic目录）
 - `-s` 线程池大小（默认为20）
 
-
-
-![screenshot](show/screenshot.png)
 

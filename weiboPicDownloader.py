@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys, locale
-import time, os, json
+import time, os, json, re
 import concurrent.futures
 import requests
 import argparse
@@ -32,12 +32,16 @@ parser = argparse.ArgumentParser(
     prog = "weiboPicDownloader",
     )
 parser.add_argument(
-    "-n", metavar = "nickname", dest = "nickname",
-    help = "target a weibo user's nickname",
+    "-u", metavar = "user", dest = "user",
+    help = "target a weibo user's nickname or id",
+    )
+parser.add_argument(
+    "-us", metavar = "users", dest = "users", nargs = "+",
+    help = "target weibo users' nickname or id",
     )
 parser.add_argument(
     "-f", metavar = "file", dest = "file",
-    help = "use a nickname list from file",
+    help = "export user list from file",
     )
 parser.add_argument(
     "-d", metavar = "directory", dest = "directory",
@@ -110,7 +114,10 @@ def read_from_file(file_path):
     try:
         file = open(file_path,"r")
         for line in file:
-            nicknames.append(line.strip().decode(system_encodeing))
+            if is_python2:
+                nicknames.append(line.strip().decode(system_encodeing))
+            else:
+                nicknames.append(line.strip())
     except Exception as e:
         quit(str(e))
     return nicknames
@@ -118,10 +125,19 @@ def read_from_file(file_path):
 def nickname_to_containerid(nickname):
     url = "https://m.weibo.com/n/{}".format(nickname)
     response = requests_with_retry(url=url)
-    if url == response.url:
-        return None
-    else:
+    if url != response.url:
         return "107603" + response.url[-10:]
+    else:
+        return None
+
+def id_to_nickname(uid):
+    url = "https://m.weibo.cn/api/container/getIndex?type=uid&value={}".format(uid)
+    response = requests_with_retry(url=url)
+    try:
+        json_data = json.loads(response.text)
+        return json_data["data"]["userInfo"]["screen_name"]
+    except:
+        return None
 
 def get_urls(containerid):
     page = 1
@@ -162,14 +178,22 @@ def download_image(url,file_path):
         f.close()
         return True
 
-# nicknames
-if args.nickname:
-    nicknames = [args.nickname.decode(system_encodeing)]
+# users
+if args.user:
+    if is_python2:
+        users = [args.user.decode(system_encodeing)]
+    else:
+        users = [args.user]
+elif args.nicknames:
+    if is_python2:
+        users = [user.decode(system_encodeing) for user in args.users]
+    else:
+        users = args.users
 elif args.file:
-    nicknames = read_from_file(args.file)
+    users = read_from_file(args.file)
 else:
     parser.print_help()
-    quit("miss nickname argument, either -n or -f is acceptable")
+    quit("miss user argument, either -n or -f is acceptable")
 
 # saving_path
 if args.directory:
@@ -188,10 +212,15 @@ else:
 
 pool = concurrent.futures.ThreadPoolExecutor(max_workers=args.size)
 
-for nickname in nicknames:
-    containerid = nickname_to_containerid(nickname)
-    if containerid == None:
-        print_fit("unvalid account {}".format(nickname))
+for user in users:
+    if re.search(r'^\d{10}$',user):
+        nickname = id_to_nickname(user)
+        containerid = "107603" + user
+    else:
+        nickname = user
+        containerid = nickname_to_containerid(user)
+    if nickname == None or containerid == None:
+        print_fit("unvalid account {}".format(user))
         continue
     print_fit("{} {}".format(nickname,containerid[6:]))
     urls = get_urls(containerid)
