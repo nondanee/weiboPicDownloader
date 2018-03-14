@@ -184,7 +184,7 @@ if args.user:
         users = [args.user.decode(system_encodeing)]
     else:
         users = [args.user]
-elif args.nicknames:
+elif args.users:
     if is_python2:
         users = [user.decode(system_encodeing) for user in args.users]
     else:
