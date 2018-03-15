@@ -9,7 +9,7 @@ import argparse
 
 try:
     reload(sys)
-    sys.setdefaultencoding('utf8') 
+    sys.setdefaultencoding("utf8")
 except:
     pass
 
@@ -52,6 +52,10 @@ parser.add_argument(
     # choices = range(1,21),
     default = 20, type = int,
     help = "set size of thread pool",
+    )
+parser.add_argument(
+    "-o", dest = "overwrite", action="store_true",
+    help = "overwrite existing pictures",
     )
 args = parser.parse_args()
 
@@ -169,6 +173,8 @@ def get_urls(containerid):
     return urls
 
 def download_image(url,file_path):
+    if os.path.exists(file_path) and not args.overwrite:
+        return True
     response = requests_with_retry(url=url,max_retry=0)
     if response == None:
         return False
@@ -213,7 +219,7 @@ else:
 pool = concurrent.futures.ThreadPoolExecutor(max_workers=args.size)
 
 for user in users:
-    if re.search(r'^\d{10}$',user):
+    if re.search(r"^\d{10}$",user):
         nickname = uid_to_nickname(user)
         uid = user
     else:
