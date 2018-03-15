@@ -230,6 +230,7 @@ for user in users:
     if not os.path.exists(user_album):
         make_dir(user_album)
 
+    counter = 0
     while True:
         total = len(urls)
         tasks = []
@@ -263,8 +264,14 @@ for user in users:
 
         if len(urls) == 0:
             break
-        elif not confirm("retry for failures?"):
+        elif counter < 2:
+            counter += 1
+            print_fit("automatic retry {}".format(counter))
+        else:
             break
+
+    for url in urls:
+        print_fit("{} failed".format(url))
 
     print_fit("-"*30)
 
