@@ -31,7 +31,7 @@
 ```
 $ python .\weiboPicDownloader.py -h
 usage: weiboPicDownloader [-h] [-u user] [-us users [users ...]] [-f file]
-                          [-d directory] [-s size] [-o]
+                          [-d directory] [-s size] [-v] [-o]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -41,7 +41,8 @@ optional arguments:
   -f file               export user list from file
   -d directory          set picture saving path
   -s size               set size of thread pool
-  -o                    overwrite existing pictures
+  -v                    download videos together
+  -o                    overwrite existing files
 ```
 
 必需参数（任选一）
@@ -54,5 +55,6 @@ optional arguments:
 
 - `-d` 图片保存路径（默认为工作路径下的weiboPic目录）
 - `-s` 线程池大小（默认为20）
-- `-o` 重新下载已保存的图片（默认跳过）
+- `-v` 同时下载秒拍视频
+- `-o` 重新下载已保存的文件（默认跳过）
 

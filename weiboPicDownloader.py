@@ -54,8 +54,12 @@ parser.add_argument(
     help = "set size of thread pool",
     )
 parser.add_argument(
+    "-v", dest = "video", action="store_true",
+    help = "download videos together",
+    )
+parser.add_argument(
     "-o", dest = "overwrite", action="store_true",
-    help = "overwrite existing pictures",
+    help = "overwrite existing files",
     )
 args = parser.parse_args()
 
@@ -102,13 +106,12 @@ def progress(done,total,percent=False):
     else:
         return "{}/{}".format(done,total)
 
-
-def requests_with_retry(url,max_retry=0):
+def requests_with_retry(url,max_retry=0,stream=False):
     headers = {"User-Agent":"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"}
     retry = 0
     while retry <= max_retry:
         try:
-            return requests.request("GET",url,headers=headers,timeout=5,verify=False)
+            return requests.request("GET",url,headers=headers,timeout=5,stream=stream,verify=False)
         except:
             retry = retry + 1
 
@@ -122,6 +125,7 @@ def read_from_file(file_path):
                 nicknames.append(line.strip().decode(system_encodeing))
             else:
                 nicknames.append(line.strip())
+        file.close()
     except Exception as e:
         quit(str(e))
     return nicknames
@@ -143,7 +147,7 @@ def uid_to_nickname(uid):
     except:
         return None
 
-def get_urls(containerid):
+def get_urls(containerid,video=False):
     page = 1
     total = 0
     counter = 0
@@ -166,22 +170,33 @@ def get_urls(containerid):
                     for pic in card["mblog"]["pics"]:
                         if "large" in pic:
                             urls.append(pic["large"]["url"])
+                elif video and "page_info" in card["mblog"] :
+                    if "media_info" in card["mblog"]["page_info"]:
+                        urls.append(card["mblog"]["page_info"]["media_info"]["stream_url"])
         page = page + 1
         time.sleep(1)
-        
-    print_fit("\npractically get {} weibos, {} pictures".format(counter,len(urls)))
+    
+    if video:
+        print_fit("\npractically get {} weibos, {} medias".format(counter,len(urls)))
+    else:
+        print_fit("\npractically get {} weibos, {} pictures".format(counter,len(urls)))
     return urls
 
-def download_image(url,file_path):
+def download(url,file_path):
     if os.path.exists(file_path) and not args.overwrite:
         return True
-    response = requests_with_retry(url=url,max_retry=0)
+    response = requests_with_retry(url=url,max_retry=0,stream=True)
     if response == None:
         return False
     else:
-        f = open(file_path,"wb")
-        f.write(response.content)
-        f.close()
+        file = open(file_path,"wb")
+        try:
+            for chunk in response.iter_content(chunk_size=512):
+                if chunk:
+                    file.write(chunk)
+        except:
+            return False
+        file.close()
         return True
 
 # users
@@ -229,7 +244,7 @@ for user in users:
         print_fit("unvalid account {}".format(user))
         continue
     print_fit("{} {}".format(nickname,uid))
-    urls = get_urls("107603" + uid)
+    urls = get_urls("107603" + uid,args.video)
     if len(urls) == 0:
         continue
     user_album = os.path.join(saving_path,nickname)
@@ -241,9 +256,10 @@ for user in users:
         total = len(urls)
         tasks = []
         for url in urls:
-            file_name = url.split("/")[-1]
+            file_name = re.sub(r"^\S+/","",url)
+            file_name = re.sub(r"\?\S+$","",file_name)
             file_path = os.path.join(user_album,file_name)
-            tasks.append(pool.submit(download_image,url,file_path))
+            tasks.append(pool.submit(download,url,file_path))
 
         done = 0
         failed = {}
