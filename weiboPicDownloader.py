@@ -163,9 +163,9 @@ def get_urls(containerid,video=False):
         if total == 0: total = json_data["data"]["cardlistInfo"]["total"]
         cards = json_data["data"]["cards"]
         for card in cards:
-            counter += 1
-            print_fit("analysing weibos... {}".format(progress(counter,total)),flush=True)
             if "mblog" in card:
+                counter += 1
+                print_fit("analysing weibos... {}".format(progress(counter,total)),flush=True)
                 if "pics" in card["mblog"]:
                     for pic in card["mblog"]["pics"]:
                         if "large" in pic:
@@ -195,9 +195,12 @@ def download(url,file_path):
                 if chunk:
                     file.write(chunk)
         except:
+            file.close()
+            os.remove(file_path)
             return False
-        file.close()
-        return True
+        else:
+            file.close()
+            return True
 
 # users
 if args.user:
@@ -242,10 +245,12 @@ for user in users:
         uid = nickname_to_uid(user)
     if nickname == None or uid == None:
         print_fit("unvalid account {}".format(user))
+        print_fit("-"*30)
         continue
     print_fit("{} {}".format(nickname,uid))
     urls = get_urls("107603" + uid,args.video)
     if len(urls) == 0:
+        print_fit("-"*30)
         continue
     user_album = os.path.join(saving_path,nickname)
     if not os.path.exists(user_album):
