@@ -147,13 +147,13 @@ def uid_to_nickname(uid):
     except:
         return None
 
-def get_urls(containerid,video=False):
+def get_urls(uid,video=False):
     page = 1
     total = 0
     counter = 0
     urls = []
     while True:
-        url = "https://m.weibo.cn/api/container/getIndex?count={}&page={}&containerid={}".format(25,page,containerid)
+        url = "https://m.weibo.cn/api/container/getIndex?count={}&page={}&containerid=107603{}".format(25,page,uid)
         response = requests_with_retry(url=url,max_retry=3)
         if response == None: continue
         json_data = json.loads(response.text)
@@ -182,8 +182,8 @@ def get_urls(containerid,video=False):
         print_fit("\npractically get {} weibos, {} pictures".format(counter,len(urls)))
     return urls
 
-def download(url,file_path):
-    if os.path.exists(file_path) and not args.overwrite:
+def download(url,file_path,overwrite):
+    if os.path.exists(file_path) and not overwrite:
         return True
     response = requests_with_retry(url=url,max_retry=0,stream=True)
     if response == None:
@@ -248,7 +248,7 @@ for user in users:
         print_fit("-"*30)
         continue
     print_fit("{} {}".format(nickname,uid))
-    urls = get_urls("107603" + uid,args.video)
+    urls = get_urls(uid,args.video)
     if len(urls) == 0:
         print_fit("-"*30)
         continue
@@ -264,7 +264,7 @@ for user in users:
             file_name = re.sub(r"^\S+/","",url)
             file_name = re.sub(r"\?\S+$","",file_name)
             file_path = os.path.join(user_album,file_name)
-            tasks.append(pool.submit(download,url,file_path))
+            tasks.append(pool.submit(download,url,file_path,args.overwrite))
 
         done = 0
         failed = {}
