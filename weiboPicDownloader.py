@@ -131,9 +131,9 @@ def read_from_file(file_path):
     return nicknames
 
 def nickname_to_uid(nickname):
-    url = "https://m.weibo.com/n/{}".format(nickname)
+    url = "https://m.weibo.cn/n/{}".format(nickname)
     response = requests_with_retry(url=url)
-    if url != response.url:
+    if re.search(r'/u/\d{10}$',response.url):
         return response.url[-10:]
     else:
         return None
@@ -236,7 +236,8 @@ else:
 
 pool = concurrent.futures.ThreadPoolExecutor(max_workers=args.size)
 
-for user in users:
+for i,user in enumerate(users,1):
+    print_fit("{}/{} {}".format(i,len(users),time.ctime()))
     if re.search(r"^\d{10}$",user):
         nickname = uid_to_nickname(user)
         uid = user
