@@ -26,10 +26,17 @@
 
 ![screenshot](show/screenshot.png)
 
+## 依赖
+
+```
+$ pip(pip3) install requests
+$ pip install futures #仅Python2需要
+```
+
 ## 使用
 
 ```
-$ python .\weiboPicDownloader.py -h
+$ python weiboPicDownloader.py -h
 usage: weiboPicDownloader [-h] [-u user] [-us users [users ...]] [-f file]
                           [-d directory] [-s size] [-v] [-o]
 
@@ -57,4 +64,3 @@ optional arguments:
 - `-s` 线程池大小（默认为20）
 - `-v` 同时下载秒拍视频
 - `-o` 重新下载已保存的文件（默认跳过）
-
