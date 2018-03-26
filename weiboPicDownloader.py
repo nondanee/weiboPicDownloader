@@ -54,6 +54,11 @@ parser.add_argument(
     help = "set size of thread pool",
     )
 parser.add_argument(
+    "-r", metavar = "retry", dest = "retry",
+    default = 2, type = int,
+    help = "set maximum number of retries",
+    )
+parser.add_argument(
     "-v", dest = "video", action="store_true",
     help = "download videos together",
     )
@@ -217,7 +222,7 @@ elif args.file:
     users = read_from_file(args.file)
 else:
     parser.print_help()
-    quit("miss user argument, either -n or -f is acceptable")
+    quit("miss user argument, -u, -us or -f is acceptable")
 
 # saving_path
 if args.directory:
@@ -292,7 +297,7 @@ for i,user in enumerate(users,1):
 
         if len(urls) == 0:
             break
-        elif counter < 2:
+        elif counter < args.retry:
             counter += 1
             print_fit("automatic retry {}".format(counter))
         else:
