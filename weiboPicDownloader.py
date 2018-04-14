@@ -24,7 +24,7 @@ except:
 
 try:
     input = raw_input
-except NameError:
+except:
     pass
 
 
@@ -120,17 +120,16 @@ def requests_with_retry(url,max_retry=0,stream=False):
         except:
             retry = retry + 1
 
-
 def read_from_file(file_path):
     nicknames = []
     try:
-        file = open(file_path,"r")
-        for line in file:
+        f = open(file_path,"r")
+        for line in f:
             if is_python2:
                 nicknames.append(line.strip().decode(system_encodeing))
             else:
                 nicknames.append(line.strip())
-        file.close()
+        f.close()
     except Exception as e:
         quit(str(e))
     return nicknames
@@ -194,17 +193,17 @@ def download(url,file_path,overwrite):
     if response == None:
         return False
     else:
-        file = open(file_path,"wb")
+        f = open(file_path,"wb")
         try:
             for chunk in response.iter_content(chunk_size=512):
                 if chunk:
-                    file.write(chunk)
+                    f.write(chunk)
         except:
-            file.close()
+            f.close()
             os.remove(file_path)
             return False
         else:
-            file.close()
+            f.close()
             return True
 
 # users
