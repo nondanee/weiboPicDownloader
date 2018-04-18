@@ -30,6 +30,7 @@
 
 ```
 $ pip(pip3) install requests
+$ pip(pip3) install colorama #仅Windows 10.0.14393以下需要
 $ pip install futures #仅Python2需要
 ```
 

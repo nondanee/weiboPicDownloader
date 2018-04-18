@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sys, locale
+import sys, locale, platform
 import time, os, json, re
 import concurrent.futures
 import requests
@@ -16,6 +16,12 @@ except:
 is_python2 = sys.version[0] == "2"
 system_encodeing = sys.stdin.encoding or locale.getpreferredencoding(True)
 
+if platform.system() == "Windows":
+    if platform.version() >= "10.0.14393":
+        os.system("")
+    else:
+        import colorama
+        colorama.init()
 
 try:
     requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
@@ -69,13 +75,12 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-def print_fit(string,flush=False):
+def print_fit(string,pin=False):
     if is_python2:
         string = string.encode(system_encodeing)
-    if flush == True:
-        sys.stdout.write("\r"+format("","<40"))
-        sys.stdout.flush()
-        sys.stdout.write("\r"+string)
+    if pin == True:
+        sys.stdout.write("\r\033[K")
+        sys.stdout.write(string)
         sys.stdout.flush()
     else:
         sys.stdout.write(string+"\n")
@@ -153,23 +158,22 @@ def uid_to_nickname(uid):
 
 def get_urls(uid,video=False):
     page = 1
-    total = 0
-    counter = 0
+    count = 25
+    total = -1
+    amount = 0
     urls = []
     while True:
-        url = "https://m.weibo.cn/api/container/getIndex?count={}&page={}&containerid=107603{}".format(25,page,uid)
+        url = "https://m.weibo.cn/api/container/getIndex?count={}&page={}&containerid=107603{}".format(count,page,uid)
         response = requests_with_retry(url=url,max_retry=3)
         if response == None: continue
+        if response.status_code != requests.codes.ok: continue
         json_data = json.loads(response.text)
-        if json_data["ok"] != 1: 
-            print_fit("finish analysis {}".format(progress(counter,total)),flush=True)
-            break
-        if total == 0: total = json_data["data"]["cardlistInfo"]["total"]
+        if total == -1: total = json_data["data"]["cardlistInfo"]["total"]
         cards = json_data["data"]["cards"]
         for card in cards:
             if "mblog" in card:
-                counter += 1
-                print_fit("analysing weibos... {}".format(progress(counter,total)),flush=True)
+                amount += 1
+                print_fit("analysing weibos... {}".format(progress(amount,total)),pin=True)
                 if "pics" in card["mblog"]:
                     for pic in card["mblog"]["pics"]:
                         if "large" in pic:
@@ -177,13 +181,17 @@ def get_urls(uid,video=False):
                 elif video and "page_info" in card["mblog"] :
                     if "media_info" in card["mblog"]["page_info"]:
                         urls.append(card["mblog"]["page_info"]["media_info"]["stream_url"])
-        page = page + 1
+        
+        if page * count >= total:
+            print_fit("finish analysis {}".format(progress(amount,total)),pin=True)
+            break
+        page += 1
         time.sleep(1)
     
     if video:
-        print_fit("\npractically get {} weibos, {} medias".format(counter,len(urls)))
+        print_fit("\npractically get {} weibos, {} medias".format(amount,len(urls)))
     else:
-        print_fit("\npractically get {} weibos, {} pictures".format(counter,len(urls)))
+        print_fit("\npractically get {} weibos, {} pictures".format(amount,len(urls)))
     return urls
 
 def download(url,file_path,overwrite):
@@ -282,10 +290,10 @@ for i,user in enumerate(users,1):
                             failed[index] = ""
             
             time.sleep(0.5)
-            print_fit("downloading... {}".format(progress(done,total,True)),flush=True)
+            print_fit("downloading... {}".format(progress(done,total,True)),pin=True)
             
             if done == total:
-                print_fit("all tasks done {}".format(progress(done,total,True)),flush=True)
+                print_fit("all tasks done {}".format(progress(done,total,True)),pin=True)
                 break
             else:
                 done = 0
