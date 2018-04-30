@@ -262,7 +262,7 @@ for i,user in enumerate(users,1):
         continue
     print_fit("{} {}".format(nickname,uid))
     urls = get_urls(uid,args.video)
-    if len(urls) == 0:
+    if not urls:
         print_fit("-"*30)
         continue
     user_album = os.path.join(saving_path,nickname)
@@ -302,7 +302,7 @@ for i,user in enumerate(users,1):
 
         urls = [urls[index] for index in failed]
 
-        if len(urls) == 0:
+        if not urls:
             break
         elif counter < args.retry:
             counter += 1
