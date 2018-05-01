@@ -159,7 +159,7 @@ def uid_to_nickname(uid):
 def get_urls(uid,video=False):
     page = 1
     count = 25
-    total = -1
+    total = 0
     amount = 0
     urls = []
     while True:
@@ -168,7 +168,10 @@ def get_urls(uid,video=False):
         if response == None: continue
         if response.status_code != requests.codes.ok: continue
         json_data = json.loads(response.text)
-        if total == -1: total = json_data["data"]["cardlistInfo"]["total"]
+        if json_data['ok'] == 0:
+            print_fit("finish analysis {}".format(progress(amount,total)),pin=True)
+            break
+        if total == 0: total = json_data["data"]["cardlistInfo"]["total"]
         cards = json_data["data"]["cards"]
         for card in cards:
             if "mblog" in card:
@@ -181,10 +184,6 @@ def get_urls(uid,video=False):
                 elif video and "page_info" in card["mblog"] :
                     if "media_info" in card["mblog"]["page_info"]:
                         urls.append(card["mblog"]["page_info"]["media_info"]["stream_url"])
-        
-        if page * count >= total:
-            print_fit("finish analysis {}".format(progress(amount,total)),pin=True)
-            break
         page += 1
         time.sleep(1)
     
