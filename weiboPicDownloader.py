@@ -167,7 +167,8 @@ def get_urls(uid,video=False):
         response = requests_with_retry(url=url,max_retry=3)
         if response == None: continue
         if response.status_code != requests.codes.ok: continue
-        json_data = json.loads(response.text)
+        try: json_data = json.loads(response.text)
+        except: continue
         if json_data['ok'] == 0:
             print_fit("finish analysis {}".format(progress(amount,total)),pin=True)
             break
