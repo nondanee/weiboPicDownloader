@@ -91,7 +91,7 @@ def input_fit(string=""):
     else:
         return input(string)
 
-def quit(string="bye bye"):
+def quit(string):
     print_fit(string)
     exit()
 
@@ -128,13 +128,12 @@ def requests_with_retry(url,max_retry=0,stream=False):
 def read_from_file(file_path):
     nicknames = []
     try:
-        f = open(file_path,"r")
-        for line in f:
-            if is_python2:
-                nicknames.append(line.strip().decode(system_encodeing))
-            else:
-                nicknames.append(line.strip())
-        f.close()
+        with open(file_path,"r") as f:
+            for line in f:
+                if is_python2:
+                    nicknames.append(line.strip().decode(system_encodeing))
+                else:
+                    nicknames.append(line.strip())
     except Exception as e:
         quit(str(e))
     return nicknames
@@ -145,7 +144,7 @@ def nickname_to_uid(nickname):
     if re.search(r'/u/\d{10}$',response.url):
         return response.url[-10:]
     else:
-        return None
+        return
 
 def uid_to_nickname(uid):
     url = "https://m.weibo.cn/api/container/getIndex?type=uid&value={}".format(uid)
@@ -154,7 +153,7 @@ def uid_to_nickname(uid):
         json_data = json.loads(response.text)
         return json_data["data"]["userInfo"]["screen_name"]
     except:
-        return None
+        return
 
 def get_urls(uid,video=False):
     page = 1
@@ -165,7 +164,7 @@ def get_urls(uid,video=False):
     while True:
         url = "https://m.weibo.cn/api/container/getIndex?count={}&page={}&containerid=107603{}".format(count,page,uid)
         response = requests_with_retry(url=url,max_retry=3)
-        if response == None: continue
+        if not response: continue
         if response.status_code != requests.codes.ok: continue
         try: json_data = json.loads(response.text)
         except: continue
@@ -198,20 +197,18 @@ def download(url,file_path,overwrite):
     if os.path.exists(file_path) and not overwrite:
         return True
     response = requests_with_retry(url=url,max_retry=0,stream=True)
-    if response == None:
+    if not response:
         return False
     else:
-        f = open(file_path,"wb")
         try:
-            for chunk in response.iter_content(chunk_size=512):
-                if chunk:
-                    f.write(chunk)
+            with open(file_path,'wb') as f:
+                for chunk in response.iter_content(chunk_size=512):
+                    if chunk:
+                        f.write(chunk)
         except:
-            f.close()
-            os.remove(file_path)
+            if os.path.exists(file_path): os.remove(file_path)
             return False
         else:
-            f.close()
             return True
 
 # users
@@ -249,39 +246,45 @@ else:
 pool = concurrent.futures.ThreadPoolExecutor(max_workers=args.size)
 
 for i,user in enumerate(users,1):
+    
     print_fit("{}/{} {}".format(i,len(users),time.ctime()))
+    
     if re.search(r"^\d{10}$",user):
         nickname = uid_to_nickname(user)
         uid = user
     else:
         nickname = user
         uid = nickname_to_uid(user)
-    if nickname == None or uid == None:
+    if not nickname or not uid:
         print_fit("unvalid account {}".format(user))
         print_fit("-"*30)
         continue
     print_fit("{} {}".format(nickname,uid))
+    
     urls = get_urls(uid,args.video)
-    if not urls:
-        print_fit("-"*30)
-        continue
+
     user_album = os.path.join(saving_path,nickname)
-    if not os.path.exists(user_album):
+    if urls and not os.path.exists(user_album):
         make_dir(user_album)
 
     counter = 0
-    while True:
+    while urls and counter <= args.retry:
+        
+        if counter > 0: print_fit("automatic retry {}".format(counter))
+        
         total = len(urls)
         tasks = []
+        done = 0
+        failed = {}
+
         for url in urls:
             file_name = re.sub(r"^\S+/","",url)
             file_name = re.sub(r"\?\S+$","",file_name)
             file_path = os.path.join(user_album,file_name)
             tasks.append(pool.submit(download,url,file_path,args.overwrite))
 
-        done = 0
-        failed = {}
-        while True:
+        while done != total:
+            done = 0
             for index,task in enumerate(tasks):
                 if task.done() == True:
                     done += 1
@@ -289,30 +292,17 @@ for i,user in enumerate(users,1):
                         if index not in failed:
                             failed[index] = ""
             
-            time.sleep(0.5)
             print_fit("downloading... {}".format(progress(done,total,True)),pin=True)
-            
-            if done == total:
-                print_fit("all tasks done {}".format(progress(done,total,True)),pin=True)
-                break
-            else:
-                done = 0
- 
+            time.sleep(0.5)
+
+        print_fit("all tasks done {}".format(progress(done,total,True)),pin=True)
         print_fit("\nsuccessfull {}, failed {}, total {}".format(total-len(failed),len(failed),total))
 
         urls = [urls[index] for index in failed]
+        counter += 1
 
-        if not urls:
-            break
-        elif counter < args.retry:
-            counter += 1
-            print_fit("automatic retry {}".format(counter))
-        else:
-            break
-
-    for url in urls:
-        print_fit("{} failed".format(url))
+    for url in urls: print_fit("{} failed".format(url))
 
     print_fit("-"*30)
 
-quit()
+quit("bye bye")
