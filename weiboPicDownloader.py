@@ -47,7 +47,7 @@ parser.add_argument(
     )
 parser.add_argument(
     "-f", metavar = "file", dest = "file",
-    help = "export user list from file",
+    help = "import user list from file",
     )
 parser.add_argument(
     "-d", metavar = "directory", dest = "directory",

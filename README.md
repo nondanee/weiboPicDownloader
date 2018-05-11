@@ -46,7 +46,7 @@ optional arguments:
   -u user               target a weibo user's nickname or id
   -us users [users ...]
                         target weibo users' nickname or id
-  -f file               export user list from file
+  -f file               import user list from file
   -d directory          set picture saving path
   -s size               set size of thread pool
   -r retry              set maximum number of retries
