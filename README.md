@@ -4,7 +4,11 @@
 
 build user album by picking all photos from original weibos in user's post feed
 
+compatible with both Python2 and Python3
+
 for more weibo free login APIs, turn to [wiki](https://github.com/nondanee/weiboPicDownloader/wiki)
+
+[中文 README](README-CN.md)
 
 
 ## References
