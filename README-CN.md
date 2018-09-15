@@ -31,17 +31,19 @@ $ pip install futures #仅Python2需要
 ```
 $ python weiboPicDownloader.py -h
 usage: weiboPicDownloader [-h] [-u user] [-us users [users ...]] [-f file]
-                          [-d directory] [-s size] [-r retry] [-v] [-o]
+                          [-d directory] [-s size] [-r retry] [-c cookie] [-v]
+                          [-o]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -u user               target a weibo user's nickname or id
+  -u user               specify a weibo user's nickname or id
   -us users [users ...]
-                        target weibo users' nickname or id
+                        specify weibo users' nickname or id
   -f file               import user list from file
   -d directory          set picture saving path
   -s size               set size of thread pool
   -r retry              set maximum number of retries
+  -c cookie             set cookie if needed
   -v                    download videos together
   -o                    overwrite existing files
 ```
@@ -57,5 +59,13 @@ optional arguments:
 - `-d directory` 图片保存路径（默认为./weiboPic目录）
 - `-s size` 线程池大小（默认为20）
 - `-r retry` 最大重试次数（默认为2）
+- `-c cookie` 登录状态 (需要cookie中的SUB值)
 - `-v` 同时下载秒拍视频
 - `-o` 重新下载已保存的文件（默认跳过）
+
+✳如何从浏览器中取得 `SUB` 的值（以Chrome举例）
+
+1. 转到 https://m.weibo.cn 并登录
+2. 右键检查 > Application > Cookies > https://m.weibo.cn
+3. 双击 `SUB` 所在行并右键拷贝它的值
+4. 将 `SUB` 粘贴到命令行窗口，以 `-c <value>` 的方式运行程序

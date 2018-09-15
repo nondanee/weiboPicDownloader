@@ -34,17 +34,19 @@ $ pip install futures #only python2 environment required
 ```
 $ python weiboPicDownloader.py -h
 usage: weiboPicDownloader [-h] [-u user] [-us users [users ...]] [-f file]
-                          [-d directory] [-s size] [-r retry] [-v] [-o]
+                          [-d directory] [-s size] [-r retry] [-c cookie] [-v]
+                          [-o]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -u user               target a weibo user's nickname or id
+  -u user               specify a weibo user's nickname or id
   -us users [users ...]
-                        target weibo users' nickname or id
+                        specify weibo users' nickname or id
   -f file               import user list from file
   -d directory          set picture saving path
   -s size               set size of thread pool
   -r retry              set maximum number of retries
+  -c cookie             set cookie if needed
   -v                    download videos together
   -o                    overwrite existing files
 ```
@@ -60,5 +62,13 @@ Optional arguments
 - `-d directory` media saving path (default value: ./weiboPic)
 - `-s size` thread pool size (default value: 20)
 - `-r retry` max retries (default value: 2)
+- `-c cookie` login status (only need the value of a certain key named `SUB`)
 - `-v` download miaopai videos at the same time
 - `-o` overwrite existing files (skipping if exists for default)
+
+✳How to get the value of `SUB` from browser (Chrome for example)
+
+1. jump to https://m.weibo.cn and log in
+2. inspect > Application > Cookies > https://m.weibo.cn
+3. double click the `SUB` line and copy its value
+4. paste it into terminal and run like  `-c <value>`
