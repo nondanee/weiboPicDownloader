@@ -68,4 +68,4 @@ optional arguments:
 1. 转到 https://m.weibo.cn 并登录
 2. 右键检查 > Application > Cookies > https://m.weibo.cn
 3. 双击 `SUB` 所在行并右键拷贝它的值
-4. 将 `SUB` 粘贴到命令行窗口，以 `-c <value>` 的方式运行程序
+4. 将 `SUB` 的值粘贴到命令行窗口，以 `-c <value>` 的方式运行程序
