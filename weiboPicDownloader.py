@@ -37,17 +37,14 @@ except:
 parser = argparse.ArgumentParser(
     prog = "weiboPicDownloader"
     )
-parser.add_argument(
-    "-u", metavar = "user", dest = "user",
-    help = "specify a weibo user's nickname or id"
+group = parser.add_mutually_exclusive_group()
+group.add_argument(
+    "-u", metavar = "user", dest = "users", nargs = '+',
+    help = "specify nickname or id of weibo users"
     )
-parser.add_argument(
-    "-us", metavar = "users", dest = "users", nargs = "+",
-    help = "specify weibo users' nickname or id"
-    )
-parser.add_argument(
-    "-f", metavar = "file", dest = "file",
-    help = "import user list from file"
+group.add_argument(
+    "-f", metavar = "file", dest = "files", nargs = '+',
+    help = "import list of users from files"
     )
 parser.add_argument(
     "-d", metavar = "directory", dest = "directory",
@@ -210,23 +207,19 @@ def download(url, file_path, overwrite):
         return True
 
 # users
-if args.user:
+if args.users:
     if is_python2:
-        users = [args.user.decode(system_encodeing)]
-    else:
-        users = [args.user]
-elif args.users:
-    if is_python2:
-        users = [user.decode(system_encodeing) for user in args.users]
+        users = [_user.decode(system_encodeing) for _user in args.users]
     else:
         users = args.users
-elif args.file:
-    users = read_from_file(args.file)
+elif args.files:
+    users = [read_from_file(_file) for _file in args.files]
+    users = reduce(lambda x, y : x + y, users)
 else:
     parser.print_help()
-    quit("miss user argument, -u, -us or -f is acceptable")
+    quit("\nmissing argument, you must provide at least one user")
 
-# saving_path
+# saving path
 if args.directory:
     saving_path = args.directory
     if os.path.exists(saving_path):

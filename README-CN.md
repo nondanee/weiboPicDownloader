@@ -30,29 +30,26 @@ $ pip install futures #仅Python2需要
 
 ```
 $ python weiboPicDownloader.py -h
-usage: weiboPicDownloader [-h] [-u user] [-us users [users ...]] [-f file]
+usage: weiboPicDownloader [-h] [-u user [user ...] | -f file [file ...]]
                           [-d directory] [-s size] [-r retry] [-c cookie] [-v]
                           [-o]
 
 optional arguments:
-  -h, --help            show this help message and exit
-  -u user               specify a weibo user's nickname or id
-  -us users [users ...]
-                        specify weibo users' nickname or id
-  -f file               import user list from file
-  -d directory          set picture saving path
-  -s size               set size of thread pool
-  -r retry              set maximum number of retries
-  -c cookie             set cookie if needed
-  -v                    download videos together
-  -o                    overwrite existing files
+  -h, --help          show this help message and exit
+  -u user [user ...]  specify nickname or id of weibo users
+  -f file [file ...]  import list of users from files
+  -d directory        set picture saving path
+  -s size             set size of thread pool
+  -r retry            set maximum number of retries
+  -c cookie           set cookie if needed
+  -v                  download videos together
+  -o                  overwrite existing files
 ```
 
 必需参数（任选一）
 
 - `-u user` 用户（昵称或ID）
-- `-us users` 多个用户（昵称或ID，用空格分隔）
-- `-f file` 用户列表文件（昵称或ID，用换行分隔）
+- `-f file` 用户列表文件（昵称或ID，一个用户占一行）
 
 可选参数
 

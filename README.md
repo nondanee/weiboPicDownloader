@@ -32,30 +32,27 @@ $ pip install futures #only python2 environment required
 ## Usage
 
 ```
-$ python weiboPicDownloader.py -h
-usage: weiboPicDownloader [-h] [-u user] [-us users [users ...]] [-f file]
+$ python .\weiboPicDownloader.py -h
+usage: weiboPicDownloader [-h] [-u user [user ...] | -f file [file ...]]
                           [-d directory] [-s size] [-r retry] [-c cookie] [-v]
                           [-o]
 
 optional arguments:
-  -h, --help            show this help message and exit
-  -u user               specify a weibo user's nickname or id
-  -us users [users ...]
-                        specify weibo users' nickname or id
-  -f file               import user list from file
-  -d directory          set picture saving path
-  -s size               set size of thread pool
-  -r retry              set maximum number of retries
-  -c cookie             set cookie if needed
-  -v                    download videos together
-  -o                    overwrite existing files
+  -h, --help          show this help message and exit
+  -u user [user ...]  specify nickname or id of weibo users
+  -f file [file ...]  import list of users from files
+  -d directory        set picture saving path
+  -s size             set size of thread pool
+  -r retry            set maximum number of retries
+  -c cookie           set cookie if needed
+  -v                  download videos together
+  -o                  overwrite existing files
 ```
 
 Required argument (choose one)
 
-- `-u user` user (nickname or ID)
-- `-us users` multiple users (nickname or ID, separated by space)
-- `-f file` user list file (nickname or ID, separated by linefeed)
+- `-u user ...` users (nickname or ID)
+- `-f file ...` user list files (nickname or ID, separated by linefeed in the file)
 
 Optional arguments
 
