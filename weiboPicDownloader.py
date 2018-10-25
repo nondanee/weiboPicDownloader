@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from functools import reduce
 import sys, locale, platform
 import time, os, json, re
 import concurrent.futures
 import requests
 import argparse
-
 
 try:
     reload(sys)
