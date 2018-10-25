@@ -157,7 +157,7 @@ def uid_to_nickname(uid):
     except:
         return
 
-def get_urls(uid, video = False):
+def get_resources(uid, video = False):
     page = 1
     count = 25
     total = 0
@@ -183,12 +183,13 @@ def get_urls(uid, video = False):
                             urls.append(pic["large"]["url"])
                 elif video and "page_info" in card["mblog"] :
                     if "media_info" in card["mblog"]["page_info"]:
-                        urls.append(card["mblog"]["page_info"]["media_info"]["stream_url"])
+                        if card["mblog"]["page_info"]["media_info"]["stream_url"]:
+                            urls.append(card["mblog"]["page_info"]["media_info"]["stream_url"])
         page += 1
         time.sleep(1)
     
     print_fit("finish analysis {}".format(progress(amount, total)), pin = True)
-    print_fit("\npractically get {} weibos, {} {}".format(amount, len(urls), "medias" if video else "pictures"))
+    print_fit("\npractically get {} weibos, {} {}".format(amount, len(urls), "resources" if video else "pictures"))
     return urls
 
 def download(url, file_path, overwrite):
@@ -252,7 +253,7 @@ for i, user in enumerate(users, 1):
         continue
     print_fit("{} {}".format(nickname, uid))
     
-    urls = get_urls(uid, args.video)
+    urls = get_resources(uid, args.video)
 
     user_album = os.path.join(saving_path, nickname)
     if urls and not os.path.exists(user_album):
