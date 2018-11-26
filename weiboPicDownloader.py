@@ -14,7 +14,7 @@ except:
     pass
 
 is_python2 = sys.version[0] == "2"
-system_encodeing = sys.stdin.encoding or locale.getpreferredencoding(True)
+system_encoding = sys.stdin.encoding or locale.getpreferredencoding(True)
 
 if platform.system() == "Windows":
     if platform.version() >= "10.0.14393":
@@ -78,7 +78,7 @@ args = parser.parse_args()
 
 def print_fit(string, pin = False):
     if is_python2:
-        string = string.encode(system_encodeing)
+        string = string.encode(system_encoding)
     if pin == True:
         sys.stdout.write("\r\033[K")
         sys.stdout.write(string)
@@ -88,7 +88,7 @@ def print_fit(string, pin = False):
 
 def input_fit(string = ""):
     if is_python2:
-        return input(string.encode(system_encodeing)).decode(system_encodeing)
+        return input(string.encode(system_encoding)).decode(system_encoding)
     else:
         return input(string)
 
@@ -133,7 +133,7 @@ def read_from_file(file_path):
         with open(file_path, "r") as f:
             for line in f:
                 if is_python2:
-                    nicknames.append(line.strip().decode(system_encodeing))
+                    nicknames.append(line.strip().decode(system_encoding))
                 else:
                     nicknames.append(line.strip())
     except Exception as e:
@@ -210,7 +210,7 @@ def download(url, file_path, overwrite):
 # users
 if args.users:
     if is_python2:
-        users = [_user.decode(system_encodeing) for _user in args.users]
+        users = [_user.decode(system_encoding) for _user in args.users]
     else:
         users = args.users
 elif args.files:
