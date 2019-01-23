@@ -46,7 +46,6 @@ parser.add_argument(
 )
 parser.add_argument(
     '-s', metavar = 'size', dest = 'size',
-    # choices = range(1,21),
     default = 20, type = int,
     help = 'set size of thread pool'
 )
@@ -147,17 +146,18 @@ def get_resources(uid, video = False):
     amount = 0
     total = sys.maxsize
     empty = 0
+    aware = 1
     urls = []
 
-    while empty < 2:
+    while empty < aware:
         try:
             url = 'https://m.weibo.cn/api/container/getIndex?count={}&page={}&containerid=107603{}'.format(size, page, uid)
             response = request_fit('GET', url, cookie = token)
             assert response.status_code != 418
             json_data = json.loads(response.text)
         except AssertionError:
-            print_fit('anti-scraping mechanism is triggered(#{})'.format(page))
-            empty = 2
+            print_fit('punished by anti-scraping mechanism (#{})'.format(page), pin = True)
+            empty = aware
         except Exception:
             pass
         else:
@@ -175,7 +175,7 @@ def get_resources(uid, video = False):
                         if 'media_info' in card['mblog']['page_info']:
                             if card['mblog']['page_info']['media_info']['stream_url']:
                                 urls.append(card['mblog']['page_info']['media_info']['stream_url'])
-            print_fit('{} {}(#{})'.format('analysing weibos...' if empty < 2 else 'finish analysis', progress(amount, total), page), pin = True)
+            print_fit('{} {}(#{})'.format('analysing weibos...' if empty < aware else 'finish analysis', progress(amount, total), page), pin = True)
             page += 1
         finally:
             time.sleep(1)
@@ -273,13 +273,11 @@ for number, user in enumerate(users, 1):
                         done += 1
                         if task.cancelled(): continue
                         elif task.result() == False: failed[index] = ''
+                    elif cancel:
+                        if not task.cancelled(): task.cancel()
                 time.sleep(0.5)
             except KeyboardInterrupt:
                 cancel = True
-                for task in tasks:
-                    if task.done(): continue
-                    elif task.running(): continue
-                    elif not task.cancelled(): task.cancel()
             finally:
                 if not cancel:
                     print_fit('{} {}'.format(
@@ -290,7 +288,7 @@ for number, user in enumerate(users, 1):
                     print_fit('waiting for cancellation... ({})'.format(total - done), pin = True) 
 
         if cancel: quit()
-        print_fit('\nsuccessfull {}, failed {}, total {}'.format(total - len(failed), len(failed), total))
+        print_fit('\nsuccess {}, failure {}, total {}'.format(total - len(failed), len(failed), total))
 
         urls = [urls[index] for index in failed]
         retry += 1
