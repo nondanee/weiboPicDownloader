@@ -9,16 +9,16 @@ import argparse
 
 try:
     reload(sys)
-    sys.setdefaultencoding("utf8")
+    sys.setdefaultencoding('utf8')
 except:
     pass
 
-is_python2 = sys.version[0] == "2"
+is_python2 = sys.version[0] == '2'
 system_encoding = sys.stdin.encoding or locale.getpreferredencoding(True)
 
-if platform.system() == "Windows":
-    if platform.version() >= "10.0.14393":
-        os.system("")
+if platform.system() == 'Windows':
+    if platform.version() >= '10.0.14393':
+        os.system('')
     else:
         import colorama
         colorama.init()
@@ -28,51 +28,45 @@ try:
 except:
     pass
 
-try:
-    input = raw_input
-except:
-    pass
-
-
 parser = argparse.ArgumentParser(
-    prog = "weiboPicDownloader"
-    )
+    prog = 'weiboPicDownloader'
+)
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
-    "-u", metavar = "user", dest = "users", nargs = '+',
-    help = "specify nickname or id of weibo users"
-    )
+    '-u', metavar = 'user', dest = 'users', nargs = '+',
+    help = 'specify nickname or id of weibo users'
+)
 group.add_argument(
-    "-f", metavar = "file", dest = "files", nargs = '+',
-    help = "import list of users from files"
-    )
+    '-f', metavar = 'file', dest = 'files', nargs = '+',
+    help = 'import list of users from files'
+)
 parser.add_argument(
-    "-d", metavar = "directory", dest = "directory",
-    help = "set picture saving path"
-    )
+    '-d', metavar = 'directory', dest = 'directory',
+    help = 'set picture saving path'
+)
 parser.add_argument(
-    "-s", metavar = "size", dest = "size",
+    '-s', metavar = 'size', dest = 'size',
     # choices = range(1,21),
     default = 20, type = int,
-    help = "set size of thread pool"
-    )
+    help = 'set size of thread pool'
+)
 parser.add_argument(
-    "-r", metavar = "retry", dest = "retry",
+    '-r', metavar = 'retry', dest = 'retry',
     default = 2, type = int,
-    help = "set maximum number of retries"
-    )
+    help = 'set maximum number of retries'
+)
 parser.add_argument(
-    "-c", metavar = "cookie", dest = "cookie",
-    help = "set cookie if needed"
-    )
+    '-c', metavar = 'cookie', dest = 'cookie',
+    help = 'set cookie if needed'
+)
 parser.add_argument(
-    "-v", dest = "video", action="store_true",
-    help = "download videos together"
-    )
+    '-v', dest = 'video', action='store_true',
+    help = 'download videos together'
+)
 parser.add_argument(
-    "-o", dest = "overwrite", action="store_true",
-    help = "overwrite existing files"
-    )
+    '-o', dest = 'overwrite', action='store_true',
+    help = 'overwrite existing files'
+)
 args = parser.parse_args()
 
 
@@ -80,19 +74,19 @@ def print_fit(string, pin = False):
     if is_python2:
         string = string.encode(system_encoding)
     if pin == True:
-        sys.stdout.write("\r\033[K")
+        sys.stdout.write('\r\033[K')
         sys.stdout.write(string)
         sys.stdout.flush()
     else:
-        sys.stdout.write(string+"\n")
+        sys.stdout.write(string + '\n')
 
-def input_fit(string = ""):
+def input_fit(string = ''):
     if is_python2:
-        return input(string.encode(system_encoding)).decode(system_encoding)
+        return raw_input(string.encode(system_encoding)).decode(system_encoding)
     else:
         return input(string)
 
-def quit(string):
+def quit(string = ''):
     print_fit(string)
     exit()
 
@@ -104,197 +98,204 @@ def make_dir(path):
 
 def confirm(message):
     while True:
-        answer = input_fit("{} [Y/n] ".format(message)).strip()
-        if answer == "y" or answer == "Y":
+        answer = input_fit('{} [Y/n] '.format(message)).strip()
+        if answer == 'y' or answer == 'Y':
             return True
-        elif answer == "n" or answer == "N":
+        elif answer == 'n' or answer == 'N':
             return False
-        print_fit("unexpected answer")
+        print_fit('unexpected answer')
 
-def progress(done, total, percent = False):
+def progress(part, whole, percent = False):
     if percent:
-        return "{}/{}({}%)".format(done, total, int(float(done) / total * 100))
+        return '{}/{}({}%)'.format(part, whole, int(float(part) / whole * 100))
     else:
-        return "{}/{}".format(done, total)
+        return '{}/{}'.format(part, whole)
 
-def requests_with_retry(url, max_retry = 0, stream = False):
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"}
-    if args.cookie and not stream: headers["Cookie"] = "SUB={}".format(args.cookie)
-    retry = 0
-    while retry <= max_retry:
-        try:
-            return requests.request("GET", url, headers = headers, timeout = 5, stream = stream, verify = False)
-        except:
-            retry = retry + 1
+def request_fit(method, url, max_retry = 0, cookie = None, stream = False):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 9; Pixel 3 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.80 Mobile Safari/537.36',
+        'Cookie': cookie
+    }
+    return requests.request(method, url, headers = headers, timeout = 5, stream = stream, verify = False)
 
-def read_from_file(file_path):
-    nicknames = []
+def read_from_file(path):
     try:
-        with open(file_path, "r") as f:
-            for line in f:
-                if is_python2:
-                    nicknames.append(line.strip().decode(system_encoding))
-                else:
-                    nicknames.append(line.strip())
+        with open(path, 'r') as f:
+            return [line.strip().decode(system_encoding) if is_python2 else line.strip() for line in f]
     except Exception as e:
         quit(str(e))
-    return nicknames
-
+    
 def nickname_to_uid(nickname):
-    url = "https://m.weibo.cn/n/{}".format(nickname)
-    response = requests_with_retry(url = url)
+    url = 'https://m.weibo.cn/n/{}'.format(nickname)
+    response = request_fit('GET', url, cookie = token)
     if re.search(r'/u/\d{10}$', response.url):
         return response.url[-10:]
     else:
         return
 
 def uid_to_nickname(uid):
-    url = "https://m.weibo.cn/api/container/getIndex?type=uid&value={}".format(uid)
-    response = requests_with_retry(url = url)
+    url = 'https://m.weibo.cn/api/container/getIndex?type=uid&value={}'.format(uid)
+    response = request_fit('GET', url, cookie = token)
     try:
-        json_data = json.loads(response.text)
-        return json_data["data"]["userInfo"]["screen_name"]
+        return json.loads(response.text)['data']['userInfo']['screen_name']
     except:
         return
 
 def get_resources(uid, video = False):
     page = 1
-    count = 25
-    total = 0
+    size = 25
     amount = 0
+    total = sys.maxsize
+    empty = 0
     urls = []
-    while True:
-        url = "https://m.weibo.cn/api/container/getIndex?count={}&page={}&containerid=107603{}".format(count, page, uid)
-        response = requests_with_retry(url = url, max_retry = 3)
-        if not response: continue
-        if response.status_code != requests.codes.ok: continue
-        try: json_data = json.loads(response.text)
-        except: continue
-        if json_data['ok'] == 0: break
-        if total == 0: total = json_data["data"]["cardlistInfo"]["total"]
-        cards = json_data["data"]["cards"]
-        for card in cards:
-            if "mblog" in card:
-                amount += 1
-                print_fit("analysing weibos... {}".format(progress(amount, total)), pin = True)
-                if "pics" in card["mblog"]:
-                    for pic in card["mblog"]["pics"]:
-                        if "large" in pic:
-                            urls.append(pic["large"]["url"])
-                elif video and "page_info" in card["mblog"] :
-                    if "media_info" in card["mblog"]["page_info"]:
-                        if card["mblog"]["page_info"]["media_info"]["stream_url"]:
-                            urls.append(card["mblog"]["page_info"]["media_info"]["stream_url"])
-        page += 1
-        time.sleep(1)
-    
-    print_fit("finish analysis {}".format(progress(amount, total)), pin = True)
-    print_fit("\npractically get {} weibos, {} {}".format(amount, len(urls), "resources" if video else "pictures"))
+
+    while empty < 2:
+        try:
+            url = 'https://m.weibo.cn/api/container/getIndex?count={}&page={}&containerid=107603{}'.format(size, page, uid)
+            response = request_fit('GET', url, cookie = token)
+            assert response.status_code != 418
+            json_data = json.loads(response.text)
+        except AssertionError:
+            print_fit('anti-scraping mechanism is triggered(#{})'.format(page))
+            empty = 2
+        except Exception:
+            pass
+        else:
+            empty = empty + 1 if json_data['ok'] == 0 else 0
+            if total == sys.maxsize: total = json_data['data']['cardlistInfo']['total']
+            cards = json_data['data']['cards']
+            for card in cards:
+                if 'mblog' in card:
+                    amount += 1
+                    if 'pics' in card['mblog']:
+                        for pic in card['mblog']['pics']:
+                            if 'large' in pic:
+                                urls.append(pic['large']['url'])
+                    elif video and 'page_info' in card['mblog'] :
+                        if 'media_info' in card['mblog']['page_info']:
+                            if card['mblog']['page_info']['media_info']['stream_url']:
+                                urls.append(card['mblog']['page_info']['media_info']['stream_url'])
+            print_fit('{} {}(#{})'.format('analysing weibos...' if empty < 2 else 'finish analysis', progress(amount, total), page), pin = True)
+            page += 1
+        finally:
+            time.sleep(1)
+
+    print_fit('\npractically get {} weibos, {} {}'.format(amount, len(urls), 'resources' if video else 'pictures'))
     return urls
 
-def download(url, file_path, overwrite):
-    if os.path.exists(file_path) and not overwrite: return True
-    response = requests_with_retry(url = url, max_retry = 0, stream = True)
-    if not response: return False
+def download(url, path, overwrite):
+    if os.path.exists(path) and not overwrite: return True
     try:
-        with open(file_path, 'wb') as f:
+        response = request_fit('GET', url, stream = True)
+        with open(path, 'wb') as f:
             for chunk in response.iter_content(chunk_size = 512):
                 if chunk:
                     f.write(chunk)
-    except:
-        if os.path.exists(file_path): os.remove(file_path)
+    except Exception:
+        if os.path.exists(path): os.remove(path)
         return False
     else:
         return True
 
-# users
+
 if args.users:
-    if is_python2:
-        users = [_user.decode(system_encoding) for _user in args.users]
-    else:
-        users = args.users
+    users = [user.decode(system_encoding) for user in args.users] if is_python2 else args.users
 elif args.files:
-    users = [read_from_file(_file) for _file in args.files]
+    users = [read_from_file(path) for path in args.files]
     users = reduce(lambda x, y : x + y, users)
 else:
     parser.print_help()
-    quit("\nmissing argument, you must provide at least one user")
+    quit('\nparameter missing, you must specify at least one user')
 
-# saving path
 if args.directory:
-    saving_path = args.directory
-    if os.path.exists(saving_path):
-        if not os.path.isdir(saving_path):
-            quit("saving path is not a directory")
-    elif confirm("directory \"{}\" doesn't exist, help me create?".format(saving_path)):
-        make_dir(saving_path)
+    base = args.directory
+    if os.path.exists(base):
+        if not os.path.isdir(base): quit('saving path is not a directory')
+    elif confirm('directory "{}" doesn\'t exist, help to create?'.format(base)):
+        make_dir(base)
     else:
-        quit("do it youself :)")
+        quit('do it youself :)')
 else:
-    saving_path = os.path.join(os.path.dirname(__file__), "weiboPic")
-    if not os.path.exists(saving_path):
-        make_dir(saving_path)
+    base = os.path.join(os.path.dirname(__file__), 'weiboPic')
+    if not os.path.exists(base): make_dir(base)
 
+token = 'SUB={}'.format(args.cookie) if args.cookie else None
 pool = concurrent.futures.ThreadPoolExecutor(max_workers = args.size)
 
-for i, user in enumerate(users, 1):
+for number, user in enumerate(users, 1):
     
-    print_fit("{}/{} {}".format(i, len(users), time.ctime()))
+    print_fit('{}/{} {}'.format(number, len(users), time.ctime()))
     
-    if re.search(r"^\d{10}$", user):
+    if re.search(r'^\d{10}$', user):
         nickname = uid_to_nickname(user)
         uid = user
     else:
         nickname = user
         uid = nickname_to_uid(user)
+
     if not nickname or not uid:
-        print_fit("invalid account {}".format(user))
-        print_fit("-"*30)
+        print_fit('invalid account {}'.format(user))
+        print_fit('-' * 30)
         continue
-    print_fit("{} {}".format(nickname, uid))
+
+    print_fit('{} {}'.format(nickname, uid))
     
-    urls = get_resources(uid, args.video)
+    try:
+        urls = get_resources(uid, args.video)
+    except KeyboardInterrupt:
+        quit()
 
-    user_album = os.path.join(saving_path, nickname)
-    if urls and not os.path.exists(user_album):
-        make_dir(user_album)
+    album = os.path.join(base, nickname)
+    if urls and not os.path.exists(album): make_dir(album)
 
-    counter = 0
-    while urls and counter <= args.retry:
+    retry = 0
+    while urls and retry <= args.retry:
         
-        if counter > 0: print_fit("automatic retry {}".format(counter))
-        
+        if retry > 0: print_fit('automatic retry {}'.format(retry))
+
         total = len(urls)
         tasks = []
         done = 0
         failed = {}
+        cancel = False
 
         for url in urls:
-            file_name = re.sub(r"^\S+/", "", url)
-            file_name = re.sub(r"\?\S+$", "", file_name)
-            file_path = os.path.join(user_album, file_name)
-            tasks.append(pool.submit(download, url, file_path, args.overwrite))
+            name = re.sub(r'^\S+/', '', url)
+            name = re.sub(r'\?\S+$', '', name)
+            path = os.path.join(album, name)
+            tasks.append(pool.submit(download, url, path, args.overwrite))
 
         while done != total:
-            done = 0
-            for index, task in enumerate(tasks):
-                if task.done() == True:
-                    done += 1
-                    if task.result() == False:
-                        if index not in failed:
-                            failed[index] = ""
-            
-            print_fit("downloading... {}".format(progress(done, total, True)), pin = True)
-            time.sleep(0.5)
+            try:
+                done = 0
+                for index, task in enumerate(tasks):
+                    if task.done() == True:
+                        done += 1
+                        if task.cancelled(): continue
+                        elif task.result() == False: failed[index] = ''
+                time.sleep(0.5)
+            except KeyboardInterrupt:
+                cancel = True
+                for task in tasks:
+                    if task.done(): continue
+                    elif task.running(): continue
+                    elif not task.cancelled(): task.cancel()
+            finally:
+                if not cancel:
+                    print_fit('{} {}'.format(
+                        'downloading...' if done != total else 'all tasks done',
+                        progress(done, total, True)
+                    ), pin = True)
+                else:
+                    print_fit('waiting for cancellation... ({})'.format(total - done), pin = True) 
 
-        print_fit("all tasks done {}".format(progress(done, total, True)), pin = True)
-        print_fit("\nsuccessfull {}, failed {}, total {}".format(total - len(failed), len(failed), total))
+        if cancel: quit()
+        print_fit('\nsuccessfull {}, failed {}, total {}'.format(total - len(failed), len(failed), total))
 
         urls = [urls[index] for index in failed]
-        counter += 1
+        retry += 1
 
-    for url in urls: print_fit("{} failed".format(url))
+    for url in urls: print_fit('{} failed'.format(url))
+    print_fit('-' * 30)
 
-    print_fit("-" * 30)
-
-quit("bye bye")
+quit('bye bye')

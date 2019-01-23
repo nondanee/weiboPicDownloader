@@ -1,14 +1,12 @@
-# weiboPicDownloader
+# weiboPicDownloader ![](https://img.shields.io/badge/python-2.7%7C3.4+-blue.svg)
 
 (not real) weibo user album batch download tool (CLI)
 
 build user album by picking all photos from original weibos in user's post feed
 
-compatible with both Python2 and Python3
-
 for more weibo free login APIs, turn to [wiki](https://github.com/nondanee/weiboPicDownloader/wiki)
 
-[中文 README](README-CN.md)
+**[中文 README](README-CN.md)**
 
 
 ## References
@@ -19,14 +17,14 @@ for more weibo free login APIs, turn to [wiki](https://github.com/nondanee/weibo
 
 ## Overview
 
-![screenshot](show/screenshot.png)
+![](https://user-images.githubusercontent.com/26399680/51592598-fd48b980-1f2a-11e9-9687-4670e7dfcd83.png)
 
 ## Dependencies
 
 ```
-$ pip(pip3) install requests
-$ pip(pip3) install colorama #only windows version under 10.0.14393 required
-$ pip install futures #only python2 environment required
+$ pip install requests
+$ pip install colorama # only windows version under 10.0.14393 required
+$ pip install futures # only python2 environment required
 ```
 
 ## Usage
