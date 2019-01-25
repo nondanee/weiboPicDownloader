@@ -55,6 +55,11 @@ parser.add_argument(
     help = 'set maximum number of retries'
 )
 parser.add_argument(
+    '-i', metavar = 'interval', dest = 'interval',
+    default = 1, type = float,
+    help = 'set interval for feed requests'
+)
+parser.add_argument(
     '-c', metavar = 'cookie', dest = 'cookie',
     help = 'set cookie if needed'
 )
@@ -140,11 +145,11 @@ def uid_to_nickname(uid):
     except:
         return
 
-def get_resources(uid, video = False):
+def get_resources(uid, video, interval):
     page = 1
     size = 25
     amount = 0
-    total = sys.maxsize
+    total = 0
     empty = 0
     aware = 1
     urls = []
@@ -162,7 +167,7 @@ def get_resources(uid, video = False):
             pass
         else:
             empty = empty + 1 if json_data['ok'] == 0 else 0
-            if total == sys.maxsize: total = json_data['data']['cardlistInfo']['total']
+            if total == 0 and 'cardlistInfo' in json_data['data']: total = json_data['data']['cardlistInfo']['total']
             cards = json_data['data']['cards']
             for card in cards:
                 if 'mblog' in card:
@@ -178,7 +183,7 @@ def get_resources(uid, video = False):
             print_fit('{} {}(#{})'.format('analysing weibos...' if empty < aware else 'finish analysis', progress(amount, total), page), pin = True)
             page += 1
         finally:
-            time.sleep(1)
+            time.sleep(interval)
 
     print_fit('\npractically get {} weibos, {} {}'.format(amount, len(urls), 'resources' if video else 'pictures'))
     return urls
@@ -241,7 +246,7 @@ for number, user in enumerate(users, 1):
     print_fit('{} {}'.format(nickname, uid))
     
     try:
-        urls = get_resources(uid, args.video)
+        urls = get_resources(uid, args.video, args.interval)
     except KeyboardInterrupt:
         quit()
 

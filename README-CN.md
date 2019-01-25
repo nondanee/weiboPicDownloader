@@ -29,8 +29,8 @@ $ pip install futures # 仅 Python2 需要
 ```
 $ python weiboPicDownloader.py -h
 usage: weiboPicDownloader [-h] [-u user [user ...] | -f file [file ...]]
-                          [-d directory] [-s size] [-r retry] [-c cookie] [-v]
-                          [-o]
+                          [-d directory] [-s size] [-r retry] [-i interval]
+                          [-c cookie] [-v] [-o]
 
 optional arguments:
   -h, --help          show this help message and exit
@@ -39,6 +39,7 @@ optional arguments:
   -d directory        set picture saving path
   -s size             set size of thread pool
   -r retry            set maximum number of retries
+  -i interval         set interval for feed requests
   -c cookie           set cookie if needed
   -v                  download videos together
   -o                  overwrite existing files
@@ -54,6 +55,7 @@ optional arguments:
 - `-d directory` 图片保存路径（默认为 ./weiboPic 目录）
 - `-s size` 线程池大小（默认为 20）
 - `-r retry` 最大重试次数（默认为 2）
+- `-i interval` 请求间隔（默认为 1，单位为秒）
 - `-c cookie` 登录状态 (需要 cookie 中的 SUB 值)
 - `-v` 同时下载秒拍视频
 - `-o` 重新下载已保存的文件（默认跳过）

@@ -32,8 +32,8 @@ $ pip install futures # only python2 environment required
 ```
 $ python .\weiboPicDownloader.py -h
 usage: weiboPicDownloader [-h] [-u user [user ...] | -f file [file ...]]
-                          [-d directory] [-s size] [-r retry] [-c cookie] [-v]
-                          [-o]
+                          [-d directory] [-s size] [-r retry] [-i interval]
+                          [-c cookie] [-v] [-o]
 
 optional arguments:
   -h, --help          show this help message and exit
@@ -42,6 +42,7 @@ optional arguments:
   -d directory        set picture saving path
   -s size             set size of thread pool
   -r retry            set maximum number of retries
+  -i interval         set interval for feed requests
   -c cookie           set cookie if needed
   -v                  download videos together
   -o                  overwrite existing files
@@ -57,6 +58,7 @@ Optional arguments
 - `-d directory` media saving path (default value: ./weiboPic)
 - `-s size` thread pool size (default value: 20)
 - `-r retry` max retries (default value: 2)
+- `-i interval` request interval (default value: 1, unit: second)
 - `-c cookie` login status (only need the value of a certain key named `SUB`)
 - `-v` download miaopai videos at the same time
 - `-o` overwrite existing files (skipping if exists for default)
