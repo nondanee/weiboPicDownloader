@@ -64,11 +64,11 @@ parser.add_argument(
     help = 'set cookie if needed'
 )
 parser.add_argument(
-    '-v', dest = 'video', action='store_true',
+    '-v', dest = 'video', action = 'store_true',
     help = 'download videos together'
 )
 parser.add_argument(
-    '-o', dest = 'overwrite', action='store_true',
+    '-o', dest = 'overwrite', action = 'store_true',
     help = 'overwrite existing files'
 )
 args = parser.parse_args()
@@ -89,6 +89,11 @@ def input_fit(string = ''):
         return raw_input(string.encode(system_encoding)).decode(system_encoding)
     else:
         return input(string)
+
+def merge(*dicts):
+    result = {}
+    for dictionary in dicts: result.update(dictionary)
+    return result
 
 def quit(string = ''):
     print_fit(string)
@@ -128,7 +133,7 @@ def read_from_file(path):
             return [line.strip().decode(system_encoding) if is_python2 else line.strip() for line in f]
     except Exception as e:
         quit(str(e))
-    
+
 def nickname_to_uid(nickname):
     url = 'https://m.weibo.cn/n/{}'.format(nickname)
     response = request_fit('GET', url, cookie = token)
@@ -152,7 +157,7 @@ def get_resources(uid, video, interval):
     total = 0
     empty = 0
     aware = 1
-    urls = []
+    resources = []
 
     while empty < aware:
         try:
@@ -171,22 +176,29 @@ def get_resources(uid, video, interval):
             cards = json_data['data']['cards']
             for card in cards:
                 if 'mblog' in card:
+                    mark = {'mid': card['mblog']['mid'], 'bid': card['mblog']['bid'], 'text': card['mblog']['text']}
                     amount += 1
                     if 'pics' in card['mblog']:
-                        for pic in card['mblog']['pics']:
+                        for index, pic in enumerate(card['mblog']['pics'], 1):
                             if 'large' in pic:
-                                urls.append(pic['large']['url'])
+                                resources.append(merge({'url': pic['large']['url'], 'index': index, 'type': 'photo'}, mark))
                     elif video and 'page_info' in card['mblog'] :
                         if 'media_info' in card['mblog']['page_info']:
                             if card['mblog']['page_info']['media_info']['stream_url']:
-                                urls.append(card['mblog']['page_info']['media_info']['stream_url'])
+                                resources.append(merge({'url': card['mblog']['page_info']['media_info']['stream_url'], 'type': 'video'}, mark))
             print_fit('{} {}(#{})'.format('analysing weibos...' if empty < aware else 'finish analysis', progress(amount, total), page), pin = True)
             page += 1
         finally:
             time.sleep(interval)
 
-    print_fit('\npractically get {} weibos, {} {}'.format(amount, len(urls), 'resources' if video else 'pictures'))
-    return urls
+    print_fit('\npractically get {} weibos, {} {}'.format(amount, len(resources), 'resources' if video else 'pictures'))
+    return resources
+
+def format_name(item):
+    url = item['url']
+    name = re.sub(r'^\S+/', '', url)
+    name = re.sub(r'\?\S+$', '', name)
+    return name
 
 def download(url, path, overwrite):
     if os.path.exists(path) and not overwrite: return True
@@ -246,29 +258,27 @@ for number, user in enumerate(users, 1):
     print_fit('{} {}'.format(nickname, uid))
     
     try:
-        urls = get_resources(uid, args.video, args.interval)
+        resources = get_resources(uid, args.video, args.interval)
     except KeyboardInterrupt:
         quit()
 
     album = os.path.join(base, nickname)
-    if urls and not os.path.exists(album): make_dir(album)
+    if resources and not os.path.exists(album): make_dir(album)
 
     retry = 0
-    while urls and retry <= args.retry:
+    while resources and retry <= args.retry:
         
         if retry > 0: print_fit('automatic retry {}'.format(retry))
 
-        total = len(urls)
+        total = len(resources)
         tasks = []
         done = 0
         failed = {}
         cancel = False
 
-        for url in urls:
-            name = re.sub(r'^\S+/', '', url)
-            name = re.sub(r'\?\S+$', '', name)
-            path = os.path.join(album, name)
-            tasks.append(pool.submit(download, url, path, args.overwrite))
+        for resource in resources:
+            path = os.path.join(album, format_name(resource))
+            tasks.append(pool.submit(download, resource['url'], path, args.overwrite))
 
         while done != total:
             try:
@@ -295,10 +305,10 @@ for number, user in enumerate(users, 1):
         if cancel: quit()
         print_fit('\nsuccess {}, failure {}, total {}'.format(total - len(failed), len(failed), total))
 
-        urls = [urls[index] for index in failed]
+        resources = [resources[index] for index in failed]
         retry += 1
 
-    for url in urls: print_fit('{} failed'.format(url))
+    for resource in resources: print_fit('{} failed'.format(resource['url']))
     print_fit('-' * 30)
 
 quit('bye bye')
