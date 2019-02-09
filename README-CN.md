@@ -28,7 +28,7 @@ $ pip install futures # 仅 Python2 需要
 
 ```
 $ python weiboPicDownloader.py -h
-usage: weiboPicDownloader [-h] [-u user [user ...] | -f file [file ...]]
+usage: weiboPicDownloader [-h] (-u user [user ...] | -f file [file ...])
                           [-d directory] [-s size] [-r retry] [-i interval]
                           [-c cookie] [-v] [-o]
 

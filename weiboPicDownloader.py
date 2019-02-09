@@ -31,7 +31,7 @@ except:
 parser = argparse.ArgumentParser(
     prog = 'weiboPicDownloader'
 )
-group = parser.add_mutually_exclusive_group()
+group = parser.add_mutually_exclusive_group(required = True)
 group.add_argument(
     '-u', metavar = 'user', dest = 'users', nargs = '+',
     help = 'specify nickname or id of weibo users'
@@ -220,9 +220,6 @@ if args.users:
 elif args.files:
     users = [read_from_file(path) for path in args.files]
     users = reduce(lambda x, y : x + y, users)
-else:
-    parser.print_help()
-    quit('\nparameter missing, you must specify at least one user')
 
 if args.directory:
     base = args.directory
