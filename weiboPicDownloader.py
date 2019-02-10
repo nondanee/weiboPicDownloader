@@ -71,7 +71,7 @@ parser.add_argument(
     '-o', dest = 'overwrite', action = 'store_true',
     help = 'overwrite existing files'
 )
-args = parser.parse_args()
+args = parser.parse_args([part + ' ' if part.startswith('-') and part not in parser._option_string_actions else part for part in sys.argv[1:]])
 
 
 def print_fit(string, pin = False):
@@ -220,6 +220,7 @@ if args.users:
 elif args.files:
     users = [read_from_file(path) for path in args.files]
     users = reduce(lambda x, y : x + y, users)
+users = [user.strip() for user in users]
 
 if args.directory:
     base = args.directory
