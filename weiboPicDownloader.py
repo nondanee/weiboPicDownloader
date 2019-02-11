@@ -71,7 +71,26 @@ parser.add_argument(
     '-o', dest = 'overwrite', action = 'store_true',
     help = 'overwrite existing files'
 )
-args = parser.parse_args([part + ' ' if part.startswith('-') and part not in parser._option_string_actions else part for part in sys.argv[1:]])
+
+short_flags = [flag for flag in parser._option_string_actions.keys() if len(flag) == 2]
+long_flags = [flag for flag in parser._option_string_actions.keys() if len(flag) > 2]
+short_flags_with_nargs = set([flag[1] for flag in short_flags if parser._option_string_actions[flag].nargs])
+short_flags_without_args = set([flag[1] for flag in short_flags if parser._option_string_actions[flag].nargs == 0])
+valid_flag = lambda part : (re.match(r'-[^-]', part) and (set(part[1:-1]).issubset(short_flags_without_args) and '-' + part[-1] in short_flags)) or (part.startswith('--') and part in long_flags)
+
+args = sys.argv[1:]
+
+greedy = False
+for index, arg in enumerate(args):
+    valid = valid_flag(arg)
+    if valid and arg[-1] in short_flags_with_nargs:
+        greedy = True
+    elif valid:
+        greedy = False
+    elif greedy: 
+        args[index] = ' ' + args[index] + ' '
+
+args = parser.parse_args(args)
 
 
 def print_fit(string, pin = False):
@@ -218,7 +237,7 @@ def download(url, path, overwrite):
 if args.users:
     users = [user.decode(system_encoding) for user in args.users] if is_python2 else args.users
 elif args.files:
-    users = [read_from_file(path) for path in args.files]
+    users = [read_from_file(path.strip()) for path in args.files]
     users = reduce(lambda x, y : x + y, users)
 users = [user.strip() for user in users]
 
