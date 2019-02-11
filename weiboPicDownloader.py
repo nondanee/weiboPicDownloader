@@ -72,26 +72,25 @@ parser.add_argument(
     help = 'overwrite existing files'
 )
 
-short_flags = [flag for flag in parser._option_string_actions.keys() if len(flag) == 2]
-long_flags = [flag for flag in parser._option_string_actions.keys() if len(flag) > 2]
-short_flags_with_nargs = set([flag[1] for flag in short_flags if parser._option_string_actions[flag].nargs])
-short_flags_without_args = set([flag[1] for flag in short_flags if parser._option_string_actions[flag].nargs == 0])
-valid_flag = lambda part : (re.match(r'-[^-]', part) and (set(part[1:-1]).issubset(short_flags_without_args) and '-' + part[-1] in short_flags)) or (part.startswith('--') and part in long_flags)
+def nargs_fit(parser, args):
+    flags = parser._option_string_actions
+    short_flags = [flag for flag in flags.keys() if len(flag) == 2]
+    long_flags = [flag for flag in flags.keys() if len(flag) > 2]
+    short_flags_with_nargs = set([flag[1] for flag in short_flags if flags[flag].nargs])
+    short_flags_without_args = set([flag[1] for flag in short_flags if flags[flag].nargs == 0])
+    validate = lambda part : (re.match(r'-[^-]', part) and (set(part[1:-1]).issubset(short_flags_without_args) and '-' + part[-1] in short_flags)) or (part.startswith('--') and part in long_flags)
 
-args = sys.argv[1:]
-
-greedy = False
-for index, arg in enumerate(args):
-    valid = valid_flag(arg)
-    if valid and arg[-1] in short_flags_with_nargs:
-        greedy = True
-    elif valid:
-        greedy = False
-    elif greedy: 
-        args[index] = ' ' + args[index] + ' '
-
-args = parser.parse_args(args)
-
+    greedy = False
+    for index, arg in enumerate(args):
+        if arg.startswith('-'):
+            valid = validate(arg)
+            if valid and arg[-1] in short_flags_with_nargs:
+                greedy = True
+            elif valid:
+                greedy = False
+            elif greedy:
+                args[index] += ' '
+    return args
 
 def print_fit(string, pin = False):
     if is_python2:
@@ -233,6 +232,8 @@ def download(url, path, overwrite):
     else:
         return True
 
+
+args = parser.parse_args(nargs_fit(parser, sys.argv[1:]))
 
 if args.users:
     users = [user.decode(system_encoding) for user in args.users] if is_python2 else args.users
