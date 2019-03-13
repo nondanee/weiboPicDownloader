@@ -202,8 +202,10 @@ def get_resources(uid, video, interval):
                                 resources.append(merge({'url': pic['large']['url'], 'index': index, 'type': 'photo'}, mark))
                     elif video and 'page_info' in card['mblog'] :
                         if 'media_info' in card['mblog']['page_info']:
-                            if card['mblog']['page_info']['media_info']['stream_url']:
-                                resources.append(merge({'url': card['mblog']['page_info']['media_info']['stream_url'], 'type': 'video'}, mark))
+                            media_info = card['mblog']['page_info']['media_info']
+                            streams = [media_info[key] for key in ['mp4_720p_mp4', 'mp4_hd_url', 'mp4_sd_url', 'stream_url'] if key in media_info and media_info[key]]
+                            if streams:
+                                resources.append(merge({'url': streams.pop(0), 'type': 'video'}, mark))
             print_fit('{} {}(#{})'.format('analysing weibos...' if empty < aware else 'finish analysis', progress(amount, total), page), pin = True)
             page += 1
         finally:
