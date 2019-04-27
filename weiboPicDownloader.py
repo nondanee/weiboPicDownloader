@@ -64,6 +64,11 @@ parser.add_argument(
     help = 'set cookie if needed'
 )
 parser.add_argument(
+    '-b', metavar = 'boundary', dest = 'boundary',
+    default = ':',
+    help = 'focus on weibos in the id range'
+)
+parser.add_argument(
     '-v', dest = 'video', action = 'store_true',
     help = 'download videos together'
 )
@@ -168,16 +173,17 @@ def uid_to_nickname(uid):
     except:
         return
 
-def get_resources(uid, video, interval):
+def get_resources(uid, video, interval, limit):
     page = 1
     size = 25
     amount = 0
     total = 0
     empty = 0
     aware = 1
+    exceed = False
     resources = []
 
-    while empty < aware:
+    while empty < aware and not exceed:
         try:
             url = 'https://m.weibo.cn/api/container/getIndex?count={}&page={}&containerid=107603{}'.format(size, page, uid)
             response = request_fit('GET', url, cookie = token)
@@ -194,24 +200,28 @@ def get_resources(uid, video, interval):
             cards = json_data['data']['cards']
             for card in cards:
                 if 'mblog' in card:
-                    mark = {'mid': card['mblog']['mid'], 'bid': card['mblog']['bid'], 'text': card['mblog']['text']}
+                    mblog = card['mblog']
+                    mid = int(mblog['mid'])
+                    mark = {'mid': mid, 'bid': mblog['bid'], 'text': mblog['text']}
                     amount += 1
-                    if 'pics' in card['mblog']:
-                        for index, pic in enumerate(card['mblog']['pics'], 1):
+                    if mid < limit[0]: exceed = True
+                    if mid < limit[0] or mid > limit[1]: continue
+                    if 'pics' in mblog:
+                        for index, pic in enumerate(mblog['pics'], 1):
                             if 'large' in pic:
                                 resources.append(merge({'url': pic['large']['url'], 'index': index, 'type': 'photo'}, mark))
-                    elif video and 'page_info' in card['mblog'] :
-                        if 'media_info' in card['mblog']['page_info']:
-                            media_info = card['mblog']['page_info']['media_info']
+                    elif 'page_info' in mblog and video:
+                        if 'media_info' in mblog['page_info']:
+                            media_info = mblog['page_info']['media_info']
                             streams = [media_info[key] for key in ['mp4_720p_mp4', 'mp4_hd_url', 'mp4_sd_url', 'stream_url'] if key in media_info and media_info[key]]
                             if streams:
                                 resources.append(merge({'url': streams.pop(0), 'type': 'video'}, mark))
-            print_fit('{} {}(#{})'.format('analysing weibos...' if empty < aware else 'finish analysis', progress(amount, total), page), pin = True)
+            print_fit('{} {}(#{})'.format('analysing weibos...' if empty < aware and not exceed else 'finish analysis', progress(amount, total), page), pin = True)
             page += 1
         finally:
             time.sleep(interval)
 
-    print_fit('\npractically get {} weibos, {} {}'.format(amount, len(resources), 'resources' if video else 'pictures'))
+    print_fit('\npractically scan {} weibos, get {} {}'.format(amount, len(resources), 'resources' if video else 'pictures'))
     return resources
 
 def format_name(item):
@@ -256,6 +266,15 @@ else:
     base = os.path.join(os.path.dirname(__file__), 'weiboPic')
     if not os.path.exists(base): make_dir(base)
 
+boundary = args.boundary.split(':')
+boundary = boundary * 2 if len(boundary) == 1 else boundary
+try:
+    boundary[0] = 0 if boundary[0] == '' else int(boundary[0])
+    boundary[1] = float('inf') if boundary[1] == '' else int(boundary[1])
+    assert boundary[0] <= boundary[1]
+except:
+    quit('invalid id range {}'.format(args.boundary))
+
 token = 'SUB={}'.format(args.cookie) if args.cookie else None
 pool = concurrent.futures.ThreadPoolExecutor(max_workers = args.size)
 
@@ -278,7 +297,7 @@ for number, user in enumerate(users, 1):
     print_fit('{} {}'.format(nickname, uid))
     
     try:
-        resources = get_resources(uid, args.video, args.interval)
+        resources = get_resources(uid, args.video, args.interval, boundary)
     except KeyboardInterrupt:
         quit()
 
