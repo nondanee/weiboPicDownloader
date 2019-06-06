@@ -2,7 +2,7 @@
 
 from functools import reduce
 import sys, locale, platform
-import time, os, json, re
+import time, os, json, re, datetime
 import concurrent.futures
 import requests
 import argparse
@@ -173,6 +173,18 @@ def uid_to_nickname(uid):
     except:
         return
 
+def parse_date(text):
+    now = datetime.datetime.now()
+    if u'前' in text:
+        if u'小时' in text:
+            return (now - datetime.timedelta(hours = int(re.search(r'\d+', text).group()))).date()
+        else:
+            return now.date()
+    elif u'昨天' in text:
+        return now.date() - datetime.timedelta(days = 1)
+    elif re.search(r'^[\d|-]+$', text):
+        return datetime.datetime.strptime(((str(now.year) + '-') if not re.search(r'^\d{4}', text) else '') + text, '%Y-%m-%d').date()
+
 def get_resources(uid, video, interval, limit):
     page = 1
     size = 25
@@ -202,7 +214,7 @@ def get_resources(uid, video, interval, limit):
                 if 'mblog' in card:
                     mblog = card['mblog']
                     mid = int(mblog['mid'])
-                    mark = {'mid': mid, 'bid': mblog['bid'], 'text': mblog['text']}
+                    mark = {'mid': mid, 'bid': mblog['bid'], 'date': parse_date(mblog['created_at']), 'text': mblog['text']}
                     amount += 1
                     if mid < limit[0]: exceed = True
                     if mid < limit[0] or mid > limit[1]: continue
