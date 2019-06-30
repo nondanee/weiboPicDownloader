@@ -51,8 +51,8 @@ optional arguments:
 
 Required argument (choose one)
 
-- `-u user ...` users (nickname or ID)
-- `-f file ...` user list files (nickname or ID, separated by linefeed in the file)
+- `-u user ...` users (nickname or id)
+- `-f file ...` user list files (nickname or id, separated by linefeed in the file)
 
 Optional arguments
 
@@ -61,7 +61,7 @@ Optional arguments
 - `-r retry` max retries (default value: `2`)
 - `-i interval` request interval (default value: `1`, unit: second)
 - `-c cookie` login credential (only need the value of a certain key named `SUB`)
-- `-b boundary` ID range of weibos (format: `id:id` between, `:id` before, `id:` after, `id` certain, `:` all)
+- `-b boundary` mid/bid range of weibos (format: `id:id` between, `:id` before, `id:` after, `id` certain, `:` all)
 - `-v` download miaopai videos at the same time
 - `-o` overwrite existing files (skipping if exists for default)
 

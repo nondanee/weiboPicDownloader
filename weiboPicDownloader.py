@@ -2,7 +2,7 @@
 
 from functools import reduce
 import sys, locale, platform
-import time, os, json, re, datetime
+import time, os, json, re, datetime, math
 import concurrent.futures
 import requests
 import argparse
@@ -173,6 +173,14 @@ def uid_to_nickname(uid):
     except:
         return
 
+def bid_to_mid(string):
+    alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    alphabet = {x: n for n, x in enumerate(alphabet)}
+
+    splited = [string[(g + 1) * -4 : g * -4 if g * -4 else None] for g in reversed(range(math.ceil(len(string) / 4.0)))]
+    convert = lambda s : str(sum([alphabet[c] * (len(alphabet) ** k) for k, c in enumerate(reversed(s))])).zfill(7)
+    return int(''.join(map(convert, splited)))
+
 def parse_date(text):
     now = datetime.datetime.now()
     if u'前' in text:
@@ -280,9 +288,10 @@ else:
 
 boundary = args.boundary.split(':')
 boundary = boundary * 2 if len(boundary) == 1 else boundary
+numberify = lambda x: int(x) if re.search(r'^\d+$', x) else bid_to_mid(x)
 try:
-    boundary[0] = 0 if boundary[0] == '' else int(boundary[0])
-    boundary[1] = float('inf') if boundary[1] == '' else int(boundary[1])
+    boundary[0] = 0 if boundary[0] == '' else numberify(boundary[0])
+    boundary[1] = float('inf') if boundary[1] == '' else numberify(boundary[1])
     assert boundary[0] <= boundary[1]
 except:
     quit('invalid id range {}'.format(args.boundary))
