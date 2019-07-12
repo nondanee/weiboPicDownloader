@@ -185,7 +185,7 @@ def parse_date(text):
     now = datetime.datetime.now()
     if u'前' in text:
         if u'小时' in text:
-            return (now - datetime.timedelta(hours = int(re.search(r'\d+', text)[0]))).date()
+            return (now - datetime.timedelta(hours = int(re.search(r'\d+', text).group()))).date()
         else:
             return now.date()
     elif u'昨天' in text:
