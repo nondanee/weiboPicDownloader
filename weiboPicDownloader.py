@@ -69,6 +69,10 @@ parser.add_argument(
     help = 'focus on weibos in the id range'
 )
 parser.add_argument(
+    '-n', metavar = 'name', dest = 'name', default = '{name}',
+    help = 'customize naming format'
+)
+parser.add_argument(
     '-v', dest = 'video', action = 'store_true',
     help = 'download videos together'
 )
@@ -245,10 +249,20 @@ def get_resources(uid, video, interval, limit):
     return resources
 
 def format_name(item):
-    url = item['url']
-    name = re.sub(r'^\S+/', '', url)
-    name = re.sub(r'\?\S+$', '', name)
-    return name
+    item['name'] = re.sub(r'\?\S+$', '', re.sub(r'^\S+/', '', item['url']))
+
+    def substitute(matched):
+        key = matched.group(1).split(':')
+        if key[0] not in item:
+            return ':'.join(key)
+        elif key[0] == 'date':
+            return item[key[0]].strftime(key[1] if len(key) > 1 else '')
+        elif key[0] == 'index':
+            return str(item[key[0]]).zfill(int(key[1] if len(key) > 1 else '0'))
+        else:
+            return str(item[key[0]])
+
+    return re.sub(r'{(.*?)}', substitute, args.name)
 
 def download(url, path, overwrite):
     if os.path.exists(path) and not overwrite: return True

@@ -33,7 +33,7 @@ $ pip install futures # only python2 environment required
 $ python .\weiboPicDownloader.py -h
 usage: weiboPicDownloader [-h] (-u user [user ...] | -f file [file ...])
                           [-d directory] [-s size] [-r retry] [-i interval]
-                          [-c cookie] [-b boundary] [-v] [-o]
+                          [-c cookie] [-b boundary] [-n name] [-v] [-o]
 
 optional arguments:
   -h, --help          show this help message and exit
@@ -45,6 +45,7 @@ optional arguments:
   -i interval         set interval for feed requests
   -c cookie           set cookie if needed
   -b boundary         focus on weibos in the id range
+  -n name             customize naming format
   -v                  download videos together
   -o                  overwrite existing files
 ```
@@ -62,6 +63,7 @@ Optional arguments
 - `-i interval` request interval (default value: `1`, unit: second)
 - `-c cookie` login credential (only need the value of a certain key named `SUB`)
 - `-b boundary` mid/bid range of weibos (format: `id:id` between, `:id` before, `id:` after, `id` certain, `:` all)
+- `-n name` naming template (default value: `{name}`, supported: `url`, `index`, `type`, `mid`, `bid`, `date`, `text`, `name`)
 - `-v` download miaopai videos at the same time
 - `-o` overwrite existing files (skipping if exists for default)
 

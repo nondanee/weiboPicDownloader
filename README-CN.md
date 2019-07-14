@@ -30,7 +30,7 @@ $ pip install futures # 仅 Python2 需要
 $ python weiboPicDownloader.py -h
 usage: weiboPicDownloader [-h] (-u user [user ...] | -f file [file ...])
                           [-d directory] [-s size] [-r retry] [-i interval]
-                          [-c cookie] [-b boundary] [-v] [-o]
+                          [-c cookie] [-b boundary] [-n name] [-v] [-o]
 
 optional arguments:
   -h, --help          show this help message and exit
@@ -42,6 +42,7 @@ optional arguments:
   -i interval         set interval for feed requests
   -c cookie           set cookie if needed
   -b boundary         focus on weibos in the id range
+  -n name             customize naming format
   -v                  download videos together
   -o                  overwrite existing files
 ```
@@ -59,6 +60,7 @@ optional arguments:
 - `-i interval` 请求间隔（默认值：`1`，单位：秒）
 - `-c cookie` 登录凭据 (需要 cookie 中的 `SUB` 值)
 - `-b boundary` 微博 mid 或 bid 范围（格式：`id:id` 两者之间，`:id` 之前，`id:` 之后，`id` 指定，`:` 全部）
+- `-n name` 命名模板 (默认值: `{name}`, 关键词: `url`, `index`, `type`, `mid`, `bid`, `date`, `text`, `name`)
 - `-v` 同时下载秒拍视频
 - `-o` 重新下载已保存的文件（默认跳过）
 
