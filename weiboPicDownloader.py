@@ -256,7 +256,7 @@ def format_name(item):
         if key[0] not in item:
             return ':'.join(key)
         elif key[0] == 'date':
-            return item[key[0]].strftime(key[1] if len(key) > 1 else '')
+            return item[key[0]].strftime(key[1]) if len(key) > 1 else str(item[key[0]])
         elif key[0] == 'index':
             return str(item[key[0]]).zfill(int(key[1] if len(key) > 1 else '0'))
         else:
