@@ -98,7 +98,7 @@ def nargs_fit(parser, args):
             elif valid:
                 greedy = False
             elif greedy:
-                args[index] += ' '
+                args[index] = ' ' + args[index]
     return args
 
 def print_fit(string, pin = False):
@@ -251,6 +251,12 @@ def get_resources(uid, video, interval, limit):
 def format_name(item):
     item['name'] = re.sub(r'\?\S+$', '', re.sub(r'^\S+/', '', item['url']))
 
+    def safeify(name):
+        template = {u'\\': u'＼', u'/': u'／', u':': u'：', u'*': u'＊', u'?': u'？', u'"': u'＂', u'<': u'＜', u'>': u'＞', u'|': u'｜'}
+        for illegal in template:
+            name = name.replace(illegal, template[illegal])
+        return name
+
     def substitute(matched):
         key = matched.group(1).split(':')
         if key[0] not in item:
@@ -260,14 +266,11 @@ def format_name(item):
         elif key[0] == 'index':
             return str(item[key[0]]).zfill(int(key[1] if len(key) > 1 else '0'))
         elif key[0] == 'text':
-            return re.sub("<.*?>", "", item[key[0]]).strip()
+            return re.sub(r'<.*?>', '', item[key[0]]).strip()
         else:
             return str(item[key[0]])
 
-    name = re.sub(r'{(.*?)}', substitute, args.name)
-    for c in R'<>:"\/|?*':  # Windows-safe filename
-        name = name.replace(c, '_')
-    return name
+    return safeify(re.sub(r'{(.*?)}', substitute, args.name))
 
 def download(url, path, overwrite):
     if os.path.exists(path) and not overwrite: return True
