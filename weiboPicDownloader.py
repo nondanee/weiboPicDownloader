@@ -259,6 +259,21 @@ def format_name(item):
             return item[key[0]].strftime(key[1]) if len(key) > 1 else str(item[key[0]])
         elif key[0] == 'index':
             return str(item[key[0]]).zfill(int(key[1] if len(key) > 1 else '0'))
+        elif key[0] == 'text':
+            return re.sub("<.*?>", "", item[key[0]]).strip()
+        else:
+            return str(item[key[0]])
+
+    name = re.sub(r'{(.*?)}', substitute, args.name)
+    for c in R'<>:"\/|?*':  # Windows-safe filename
+        name = name.replace(c, '_')
+    return name
+
+    name = re.sub(r'{(.*?)}', substitute, args.name)
+    for c in R'<>:"\/|?*':  # Windows-safe filename
+        name = name.replace(c, '_')
+    print(name)
+    return name
         else:
             return str(item[key[0]])
 
