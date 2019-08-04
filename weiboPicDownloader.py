@@ -269,16 +269,6 @@ def format_name(item):
         name = name.replace(c, '_')
     return name
 
-    name = re.sub(r'{(.*?)}', substitute, args.name)
-    for c in R'<>:"\/|?*':  # Windows-safe filename
-        name = name.replace(c, '_')
-    print(name)
-    return name
-        else:
-            return str(item[key[0]])
-
-    return re.sub(r'{(.*?)}', substitute, args.name)
-
 def download(url, path, overwrite):
     if os.path.exists(path) and not overwrite: return True
     try:
