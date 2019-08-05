@@ -2,7 +2,7 @@
 
 from functools import reduce
 import sys, locale, platform
-import time, os, json, re, datetime, math
+import time, os, json, re, datetime, math, operator
 import concurrent.futures
 import requests
 import argparse
@@ -17,7 +17,7 @@ is_python2 = sys.version[0] == '2'
 system_encoding = sys.stdin.encoding or locale.getpreferredencoding(True)
 
 if platform.system() == 'Windows':
-    if platform.version() >= '10.0.14393':
+    if operator.ge(*map(lambda version: list(map(int, version.split('.'))), [platform.version(), '10.0.14393'])):
         os.system('')
     else:
         import colorama
