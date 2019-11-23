@@ -225,10 +225,11 @@ def get_resources(uid, video, interval, limit):
             for card in cards:
                 if 'mblog' in card:
                     mblog = card['mblog']
+                    if 'isTop' in mblog and mblog['isTop']: continue
                     mid = int(mblog['mid'])
                     mark = {'mid': mid, 'bid': mblog['bid'], 'date': parse_date(mblog['created_at']), 'text': mblog['text']}
                     amount += 1
-                    if mid < limit[0] and not ('isTop' in mblog and mblog['isTop']): exceed = True
+                    if mid < limit[0]: exceed = True
                     if mid < limit[0] or mid > limit[1]: continue
                     if 'pics' in mblog:
                         for index, pic in enumerate(mblog['pics'], 1):
