@@ -59,7 +59,7 @@ optional arguments:
 - `-r retry` 最大重试次数（默认值：`2`）
 - `-i interval` 请求间隔（默认值：`1`，单位：秒）
 - `-c cookie` 登录凭据 (需要 cookie 中的 `SUB` 值)
-- `-b boundary` 微博 mid 或 bid 范围（格式：`id:id` 两者之间，`:id` 之前，`id:` 之后，`id` 指定，`:` 全部）
+- `-b boundary` 微博 mid/bid 或日期范围（格式：`id:id` 两者之间，`:id` 之前，`id:` 之后，`id` 指定，`:` 全部）
 - `-n name` 命名模板 (标识符: `url`、`index`、`type`、`mid`、`bid`、`date`、`text`、`name`，类似 ["f-Strings"](https://www.python.org/dev/peps/pep-0498/#abstract) 语法)
 - `-v` 同时下载秒拍视频
 - `-o` 重新下载已保存的文件（默认跳过）

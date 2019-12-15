@@ -62,7 +62,7 @@ Optional arguments
 - `-r retry` max retries (default value: `2`)
 - `-i interval` request interval (default value: `1`, unit: second)
 - `-c cookie` login credential (only need the value of a certain key named `SUB`)
-- `-b boundary` mid/bid range of weibos (format: `id:id` between, `:id` before, `id:` after, `id` certain, `:` all)
+- `-b boundary` mid/bid/date range of weibos (format: `id:id` between, `:id` before, `id:` after, `id` certain, `:` all)
 - `-n name` naming template (identifier: `url`, `index`, `type`, `mid`, `bid`, `date`, `text`, `name`, like ["f-Strings"](https://www.python.org/dev/peps/pep-0498/#abstract) syntax)
 - `-v` download miaopai videos at the same time
 - `-o` overwrite existing files (skipping if exists for default)

@@ -197,6 +197,17 @@ def parse_date(text):
     elif re.search(r'^[\d|-]+$', text):
         return datetime.datetime.strptime(((str(now.year) + '-') if not re.search(r'^\d{4}', text) else '') + text, '%Y-%m-%d').date()
 
+def compare(standard, operation, candidate):
+    for target in candidate:
+        try:
+            result = '>=<'
+            if standard > target: result = '>'
+            elif standard == target: result = '='
+            else: result = '<'
+            return result in operation
+        except TypeError:
+            pass
+
 def get_resources(uid, video, interval, limit):
     page = 1
     size = 25
@@ -227,10 +238,11 @@ def get_resources(uid, video, interval, limit):
                     mblog = card['mblog']
                     if 'isTop' in mblog and mblog['isTop']: continue
                     mid = int(mblog['mid'])
-                    mark = {'mid': mid, 'bid': mblog['bid'], 'date': parse_date(mblog['created_at']), 'text': mblog['text']}
+                    date = parse_date(mblog['created_at'])
+                    mark = {'mid': mid, 'bid': mblog['bid'], 'date': date, 'text': mblog['text']}
                     amount += 1
-                    if mid < limit[0]: exceed = True
-                    if mid < limit[0] or mid > limit[1]: continue
+                    if compare(limit[0], '>', [mid, date]): exceed = True
+                    if compare(limit[0], '>', [mid, date]) or compare(limit[1], '<', [mid, date]): continue
                     if 'pics' in mblog:
                         for index, pic in enumerate(mblog['pics'], 1):
                             if 'large' in pic:
@@ -312,10 +324,12 @@ else:
 boundary = args.boundary.split(':')
 boundary = boundary * 2 if len(boundary) == 1 else boundary
 numberify = lambda x: int(x) if re.search(r'^\d+$', x) else bid_to_mid(x)
+dateify = lambda t: datetime.datetime.strptime(t, '@%Y%m%d').date()
+parse_point = lambda p: dateify(p) if p.startswith('@') else numberify(p)
 try:
-    boundary[0] = 0 if boundary[0] == '' else numberify(boundary[0])
-    boundary[1] = float('inf') if boundary[1] == '' else numberify(boundary[1])
-    assert boundary[0] <= boundary[1]
+    boundary[0] = 0 if boundary[0] == '' else parse_point(boundary[0])
+    boundary[1] = float('inf') if boundary[1] == '' else parse_point(boundary[1])
+    if type(boundary[0]) == type(boundary[1]): assert boundary[0] <= boundary[1]
 except:
     quit('invalid id range {}'.format(args.boundary))
 
